@@ -31,6 +31,16 @@
 /// 8. Удалён элемент (s, item)
 /// 9. Помечен произвольный элемент стека (s, item).
 /// 
+/// 
+/// v' = w
+/// x' = v
+/// 
+/// t(i+1) - ti = h
+/// 
+/// x += h*v + h*h/2*a
+/// v += h*w
+/// 
+/// 
 #ifndef GRAVIS24_EVENT_HPP
 #define GRAVIS24_EVENT_HPP
 
@@ -73,31 +83,38 @@ namespace gravis24
         struct VertexColorChanged
         {
             int vertex;
-            RGBA rgb;
+            RGBA color;
         };
 
         struct ArcColorChanged
         {
+            RGBA color;
             Arc arc;
-            RGBA rgb;
         };
 
         struct VertexRadiusChanged
         {
-            int vertex;
             float radius;
+            int vertex;
         };
 
         struct ArcWidthChanged
         {
-            Arc arc;
             float width;
+            Arc arc;
         };
 
         struct VertexPositionChanged
         {
-            int vertex;
             XYZ xyz;
+            int vertex;
+        };
+
+        struct ItemColorChanged
+        {
+            RGBA color;
+            int item_index;
+            int array_index;
         };
 
 
@@ -113,12 +130,22 @@ namespace gravis24
             int vertex;
         };
 
+        struct ArcIsTree
+        {
+            Arc arc;
+        };
+
         struct ArcIsForward
         {
             Arc arc;
         };
 
         struct ArcIsBackward
+        {
+            Arc arc;
+        };
+
+        struct ArcIsCross
         {
             Arc arc;
         };
@@ -164,10 +191,13 @@ namespace gravis24
                         VertexRadiusChanged,
                         ArcWidthChanged,
                         VertexPositionChanged,
+                        ItemColorChanged,
                         VertexIsOpened,
                         VertexIsClosed,
+                        ArcIsTree,
                         ArcIsForward,
                         ArcIsBackward,
+                        ArcIsCross,
                         VertexLabelIsChanged,
                         ArcLabelIsChanged,
                         ItemIsSet,
