@@ -31,16 +31,6 @@
 /// 8. Удалён элемент (s, item)
 /// 9. Помечен произвольный элемент стека (s, item).
 /// 
-/// 
-/// v' = w
-/// x' = v
-/// 
-/// t(i+1) - ti = h
-/// 
-/// x += h*v + h*h/2*a
-/// v += h*w
-/// 
-/// 
 #ifndef GRAVIS24_EVENT_HPP
 #define GRAVIS24_EVENT_HPP
 
