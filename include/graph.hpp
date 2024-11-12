@@ -27,25 +27,25 @@ namespace gravis24
     public:
         virtual ~EdgeListView() = default;
 
-        /// @brief Получить все рёбра.
+        /// @brief РџРѕР»СѓС‡РёС‚СЊ РІСЃРµ СЂС‘Р±СЂР°.
         [[nodiscard]] virtual auto getEdges() const noexcept
             -> std::span<Arc const> = 0;
 
-        /// @brief Узнать сколько целочисленных атрибутов назначено на рёбра.
+        /// @brief РЈР·РЅР°С‚СЊ СЃРєРѕР»СЊРєРѕ С†РµР»РѕС‡РёСЃР»РµРЅРЅС‹С… Р°С‚СЂРёР±СѓС‚РѕРІ РЅР°Р·РЅР°С‡РµРЅРѕ РЅР° СЂС‘Р±СЂР°.
         [[nodiscard]] virtual auto getIntAttributeCount() const noexcept
             -> int = 0;
         
-        /// @brief Получить массив целочисленных атрибутов для всех рёбер (индекс ребра как в getEdges).
-        /// @param attributeIndex < getIntAttributeCount() или возвращает пустой span
+        /// @brief РџРѕР»СѓС‡РёС‚СЊ РјР°СЃСЃРёРІ С†РµР»РѕС‡РёСЃР»РµРЅРЅС‹С… Р°С‚СЂРёР±СѓС‚РѕРІ РґР»СЏ РІСЃРµС… СЂС‘Р±РµСЂ (РёРЅРґРµРєСЃ СЂРµР±СЂР° РєР°Рє РІ getEdges).
+        /// @param attributeIndex < getIntAttributeCount() РёР»Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ span
         [[nodiscard]] virtual auto getIntAttributes(int attributeIndex) const noexcept
             -> std::span<int const> = 0;
 
-        /// @brief Узнать сколько атрибутов типа float назначено на рёбра.
+        /// @brief РЈР·РЅР°С‚СЊ СЃРєРѕР»СЊРєРѕ Р°С‚СЂРёР±СѓС‚РѕРІ С‚РёРїР° float РЅР°Р·РЅР°С‡РµРЅРѕ РЅР° СЂС‘Р±СЂР°.
         [[nodiscard]] virtual auto getFloatAttributeCount() const noexcept
             -> int = 0;
 
-        /// @brief Получить массив атрибутов float для всех рёбер (индекс ребра как в getEdges).
-        /// @param attributeIndex < getFloatAttributeCount() или возвращает пустой span
+        /// @brief РџРѕР»СѓС‡РёС‚СЊ РјР°СЃСЃРёРІ Р°С‚СЂРёР±СѓС‚РѕРІ float РґР»СЏ РІСЃРµС… СЂС‘Р±РµСЂ (РёРЅРґРµРєСЃ СЂРµР±СЂР° РєР°Рє РІ getEdges).
+        /// @param attributeIndex < getFloatAttributeCount() РёР»Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ span
         [[nodiscard]] virtual auto getFloatAttributes(int attributeIndex) const noexcept
             -> std::span<float const> = 0;
     };
@@ -65,7 +65,7 @@ namespace gravis24
                 : _data(data)
                 , _offset(first_bit_offset)
             {
-                // Пусто.
+                // РџСѓСЃС‚Рѕ.
             }
             
             [[nodiscard]] bool operator[](int index) const noexcept
@@ -92,8 +92,8 @@ namespace gravis24
         virtual auto getVertexCount() const noexcept
             -> int = 0;
         
-        /// @brief Получить строку матрицы смежности
-        /// @param index < getVertexCount() или возвращает пустой (невалидный) Row
+        /// @brief РџРѕР»СѓС‡РёС‚СЊ СЃС‚СЂРѕРєСѓ РјР°С‚СЂРёС†С‹ СЃРјРµР¶РЅРѕСЃС‚Рё
+        /// @param index < getVertexCount() РёР»Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ (РЅРµРІР°Р»РёРґРЅС‹Р№) Row
         virtual auto getRow(int index) const noexcept
             -> Row = 0;
     };
@@ -114,7 +114,7 @@ namespace gravis24
                 : _graph(graph)
                 , _vertexPositions(vertexPositions)
             {
-                // Пусто.
+                // РџСѓСЃС‚Рѕ.
             }
 
             [[nodiscard]] auto operator()() const noexcept
@@ -138,8 +138,8 @@ namespace gravis24
                 = delete;
             auto operator=(ChangeableVertexPositions const&)
                 -> ChangeableVertexPositions& = delete;
-            // Также автоматически отключает 
-            // перемещающие конструктор и оператор=.
+            // РўР°РєР¶Рµ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РѕС‚РєР»СЋС‡Р°РµС‚ 
+            // РїРµСЂРµРјРµС‰Р°СЋС‰РёРµ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ Рё РѕРїРµСЂР°С‚РѕСЂ=.
 
             Graph&         _graph;
             std::span<XYZ> _vertexPositions;
