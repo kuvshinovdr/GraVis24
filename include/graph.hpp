@@ -61,20 +61,25 @@ namespace gravis24
 
             Row() noexcept = default;
 
-            explicit Row(Chunk const* data, int first_bit_offset = 0) noexcept
+            explicit Row(Chunk const* data, int firstBitOffset = 0) noexcept
                 : _data(data)
-                , _offset(first_bit_offset)
+                , _offset(firstBitOffset)
             {
                 // Пусто.
             }
             
+            [[nodiscard]] bool getBit(int index) const noexcept
+            {
+                constexpr auto chunkBits = 8 * sizeof(Chunk);
+                auto const bitIndex  = unsigned(index + _offset);
+                auto const chunk     = bitIndex / chunkBits;
+                auto const bitOffset = bitIndex % chunkBits;
+                return ((_data[chunk] >> bit_offset) & 1) == 1;
+            }
+
             [[nodiscard]] bool operator[](int index) const noexcept
             {
-                constexpr auto chunk_bits = 8 * sizeof(Chunk);
-                auto const bit_index  = unsigned(index + _offset);
-                auto const chunk      = bit_index / chunk_bits;
-                auto const bit_offset = bit_index % chunk_bits;
-                return ((_data[chunk] >> bit_offset) & 1) == 1;
+                return get(index);
             }
 
             [[nodiscard]] bool isValid() const noexcept
@@ -89,13 +94,39 @@ namespace gravis24
 
         virtual ~AdjacencyMatrixView() = default;
 
-        virtual auto getVertexCount() const noexcept
+        [[nodiscard]] virtual auto getVertexCount() const noexcept
             -> int = 0;
         
         /// @brief Получить строку матрицы смежности
         /// @param index < getVertexCount() или возвращает пустой (невалидный) Row
-        virtual auto getRow(int index) const noexcept
+        [[nodiscard]] virtual auto getRow(int index) const noexcept
             -> Row = 0;
+
+        [[nodiscard]] auto operator[](int index) const noexcept
+            -> Row
+        {
+            return getRow(index);
+        }
+    };
+
+
+    class AdjacencyListView
+    {
+    public:
+        virtual ~AdjacencyListView() = default;
+
+        [[nodiscard]] virtual auto getVertexCount() const noexcept
+            -> int = 0;
+
+        [[nodiscard]] virtual bool areConnected(int source, int target) const noexcept 
+            = 0;
+
+        [[nodiscard]] virtual auto neighborsCount(int vertex) const noexcept
+            -> int = 0;
+
+        /// @brief Если вершины нет (неверный индекс), возвращает пустой span.
+        [[nodiscard]] virtual auto getNeighbors(int vertex) const noexcept
+            -> std::span<int const> = 0;
     };
 
 
@@ -106,6 +137,37 @@ namespace gravis24
 
         [[nodiscard]] virtual auto getVertexCount() const noexcept
             -> int = 0;
+        [[nodiscard]] virtual auto getEdgeCount() const noexcept
+            -> int = 0;
+
+        [[nodiscard]] virtual bool hasEdgeListView() const noexcept
+            = 0;
+        [[nodiscard]] virtual auto getEdgeListView() const
+            -> EdgeListView const& = 0;
+
+        [[nodiscard]] virtual bool hasAdjacencyMatrixView() const noexcept
+            = 0;
+        [[nodiscard]] virtual auto getAdjacencyMatrixView() const
+            -> AdjacencyMatrixView const& = 0;
+
+        [[nodiscard]] virtual bool hasAdjacencyListView() const noexcept
+            = 0;
+        [[nodiscard]] virtual auto getAdjacencyListView() const
+            -> AdjacencyListView const& = 0;
+
+        /// @brief        Добавить дугу, если её нет.
+        /// @param source исходная вершина
+        /// @param target целевая вершина
+        /// @return       true, если дуга была добавлена, иначе false (дуга уже была)
+        virtual bool connect(int source, int target)
+            = 0;
+
+        /// @brief        Удалить дугу, если она есть.
+        /// @param source исходная вершина
+        /// @param target целевая вершина
+        /// @return       true, если дуга была удалена, иначе false (дуги уже не было)
+        virtual bool disconnect(int source, int target)
+            = 0;
 
         friend class ChangeableVertexPositions
         {
@@ -117,7 +179,24 @@ namespace gravis24
                 // Пусто.
             }
 
-            [[nodiscard]] auto operator()() const noexcept
+            [[nodiscard]] bool empty() const noexcept
+            {
+                return _vertexPositions.empty();
+            }
+
+            [[nodiscard]] auto size() const noexcept
+                -> int
+            {
+                return static_cast<int>(_vertexPositions.size());
+            }
+
+            [[nodiscard]] auto operator[](int index) const noexcept
+                -> XYZ const&
+            {
+                return _vertexPositions[index];
+            }
+
+            [[nodiscard]] auto getSpan() const noexcept
             {
                 return _vertexPositions;
             }
@@ -151,16 +230,8 @@ namespace gravis24
         [[nodiscard]] virtual auto getVertexPositions() noexcept
             -> ChangeableVertexPositions = 0;
 
-
-        [[nodiscard]] virtual auto getEdgeListView() const
-            -> EdgeListView const& = 0;
-
-        [[nodiscard]] virtual auto getAdjacencyMatrixView() const
-            -> AdjacencyMatrixView const& = 0;
-
-
     private:
-        virtual void onVertexPositionsChange() = 0;
+        virtual void onVertexPositionsChange() noexcept = 0;
     };
 
 }
