@@ -3,6 +3,7 @@
 #define GRAVIS24_GRAPH_HPP
 
 #include <span>
+#include <climits>
 #include <cstdint>
 
 namespace gravis24
@@ -54,14 +55,15 @@ namespace gravis24
     class AdjacencyMatrixView
     {
     public:
-        class Row
+        class RowView
         {
         public:
             using Chunk = uint32_t;
+            static constexpr auto chunkBits = 8 * sizeof(Chunk);
 
-            Row() noexcept = default;
+            RowView() noexcept = default;
 
-            explicit Row(Chunk const* data, int firstBitOffset = 0) noexcept
+            explicit RowView(Chunk const* data, int firstBitOffset = 0) noexcept
                 : _data(data)
                 , _offset(firstBitOffset)
             {
@@ -70,7 +72,6 @@ namespace gravis24
             
             [[nodiscard]] bool getBit(int index) const noexcept
             {
-                constexpr auto chunkBits = 8 * sizeof(Chunk);
                 auto const bitIndex  = unsigned(index + _offset);
                 auto const chunk     = bitIndex / chunkBits;
                 auto const bitOffset = bitIndex % chunkBits;
@@ -100,10 +101,10 @@ namespace gravis24
         /// @brief Получить строку матрицы смежности
         /// @param index < getVertexCount() или возвращает пустой (невалидный) Row
         [[nodiscard]] virtual auto getRow(int index) const noexcept
-            -> Row = 0;
+            -> RowView = 0;
 
         [[nodiscard]] auto operator[](int index) const noexcept
-            -> Row
+            -> RowView
         {
             return getRow(index);
         }
