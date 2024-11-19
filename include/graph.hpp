@@ -2,53 +2,19 @@
 #ifndef GRAVIS24_GRAPH_HPP
 #define GRAVIS24_GRAPH_HPP
 
-#include <span>
+#include "edge_list.hpp"
+
 #include <climits>
 #include <cstdint>
 
 namespace gravis24
 {
 
-    struct Arc
-    {
-        int source;
-        int target;
-    };
-
     struct XYZ
     {
         float x;
         float y;
         float z;
-    };
-
-
-    class EdgeListView
-    {
-    public:
-        virtual ~EdgeListView() = default;
-
-        /// @brief Получить все рёбра.
-        [[nodiscard]] virtual auto getEdges() const noexcept
-            -> std::span<Arc const> = 0;
-
-        /// @brief Узнать сколько целочисленных атрибутов назначено на рёбра.
-        [[nodiscard]] virtual auto getIntAttributeCount() const noexcept
-            -> int = 0;
-        
-        /// @brief Получить массив целочисленных атрибутов для всех рёбер (индекс ребра как в getEdges).
-        /// @param attributeIndex < getIntAttributeCount() или возвращает пустой span
-        [[nodiscard]] virtual auto getIntAttributes(int attributeIndex) const noexcept
-            -> std::span<int const> = 0;
-
-        /// @brief Узнать сколько атрибутов типа float назначено на рёбра.
-        [[nodiscard]] virtual auto getFloatAttributeCount() const noexcept
-            -> int = 0;
-
-        /// @brief Получить массив атрибутов float для всех рёбер (индекс ребра как в getEdges).
-        /// @param attributeIndex < getFloatAttributeCount() или возвращает пустой span
-        [[nodiscard]] virtual auto getFloatAttributes(int attributeIndex) const noexcept
-            -> std::span<float const> = 0;
     };
 
 
@@ -170,6 +136,9 @@ namespace gravis24
         virtual bool disconnect(int source, int target)
             = 0;
 
+        virtual bool areConnected(int source, int target) const noexcept
+            = 0;
+
         friend class ChangeableVertexPositions
         {
         public:
@@ -202,6 +171,16 @@ namespace gravis24
                 return _vertexPositions;
             }
             
+            [[nodiscard]] auto begin() const noexcept
+            {
+                return _vertexPositions.begin();
+            }
+
+            [[nodiscard]] auto end() const noexcept
+            {
+                return _vertexPositions.end();
+            }
+
             [[nodiscard]] auto getGraph() const noexcept
                 -> Graph&
             {

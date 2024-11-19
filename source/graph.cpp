@@ -1,120 +1,12 @@
 /// @file graph.cpp
 #include "../include/graph.hpp"
+
 #include <vector>
 #include <algorithm>
+#include <ranges>
 
 namespace gravis24
-{
-
-    /////////////////////////////////////////////////////
-    // Класс EdgeListViewImpl
-
-    class EdgeListViewImpl 
-        : public EdgeListView
-    {
-    public:
-        /////////////////////////////////////////////////////
-        // Реализация интерфейса EdgeListView
-
-        [[nodiscard]] auto getEdges() const noexcept
-            -> std::span<Arc const> override
-        {
-            return _arcs;
-        }
-
-        [[nodiscard]] auto getIntAttributeCount() const noexcept
-            -> int override
-        {
-            return static_cast<_intAttrs.size()>;
-        }
-
-        [[nodiscard]] auto getIntAttributes(int attributeIndex) const noexcept
-            -> std::span<int const> override
-        {
-            auto const i = static_cast<size_t>(attributeIndex);
-            if (i < _intAttrs.size())
-                return _intAttrs[i];
-            return {};
-        }
-
-        [[nodiscard]] auto getFloatAttributeCount() const noexcept
-            -> int override
-        {
-            return static_cast<_floatAttrs.size()>;
-        }
-
-        [[nodiscard]] auto getFloatAttributes(int attributeIndex) const noexcept
-            -> std::span<float const> override
-        {
-            auto const i = static_cast<size_t>(attributeIndex);
-            if (i < _floatAttrs.size())
-                return _floatAttrs[i];
-            return {};
-        }
-
-        /////////////////////////////////////////////////////
-        // Операции конструирования
-
-        EdgeListViewImpl() noexcept = default;
-        
-        explicit EdgeListViewImpl(
-            int arcsCount, int intAttrsCount = 0, int floatAttrsCount = 0)
-            : _intAttrs(intAttrsCount)
-            , _floatAttrs(floatAttrsCount)
-        {
-            _arcs.reserve(arcsCount);
-            for (auto& attrs: _intAttrs)
-                attrs.reserve(arcsCount);
-            for (auto& attrs: _floatAttrs)
-                attrs.reserve(arcsCount);
-        }
-
-        void connect(int source, int target)
-        {
-            _arcs.emplace_back(source, target);
-            attributesResize();
-        }
-
-        [[nodiscard]] auto getIntAttributes(int attributeIndex) noexcept
-            -> std::span<int>
-        {
-            auto const i = static_cast<size_t>(attributeIndex);
-            if (i < _intAttrs.size())
-                return _intAttrs[i];
-            return {};
-        }
-
-        [[nodiscard]] auto getFloatAttributes(int attributeIndex) noexcept
-            -> std::span<float>
-        {
-            auto const i = static_cast<size_t>(attributeIndex);
-            if (i < _floatAttrs.size())
-                return _floatAttrs[i];
-            return {};
-        }
-
-    private:
-        std::vector<Arc>                _arcs;
-        std::vector<std::vector<int>>   _intAttrs;
-        std::vector<std::vector<float>> _floatAttrs;
-
-        void attributesResize()
-        {
-            auto const requiredSize = _arcs.size();
-            for (auto& attrs: _intAttrs)
-                attributesResize(attrs, requiredSize);
-            for (auto& attrs: _floatAttrs)
-                attributesResize(attrs, requiredSize);
-        }
-
-        static void attributesResize(auto& attrs, size_t requiredSize)
-        {
-            if (attrs.capacity() < requiredSize)
-                attrs.reserve(requiredSize + (requiredSize >> 1));
-            attrs.resize(requiredSize);
-        }
-    };
-
+{ 
 
     /////////////////////////////////////////////////////
     // Класс AdjacencyMatrixViewImpl
@@ -195,6 +87,24 @@ namespace gravis24
                 auto const chunk     = bitIndex / chunkBits;
                 auto const bitOffset = bitIndex % chunkBits;
                 _data[chunk] &= ~(Chunk(1) << bitOffset);
+            }
+
+            void reset(int firstBit, int untilBit) noexcept
+            {
+                auto const beginBit    = unsigned(firstBit + _offset);
+                auto const endBit      = unsigned(untilBit + _offset);
+                auto const beginChunk  = beginBit / chunkBits;
+                auto const beginOffset = beginBit % chunkBits;
+                auto const endChunk    = endBit / chunkBits;
+                auto const endOffset   = endBit % chunkBits;
+                if (beginChunk == endChunk)
+                {
+                    auto const chunk = _data[beginChunk];
+                    auto const m1    = (Chunk{1} << beginOffset) - 1;
+                    auto const m2    = (Chunk{1} << (endOffset + 1)) - 1;
+                    auto const m3    = ~m1 | m2;
+                    _data[beginChunk] &= m3;
+                }
             }
 
             void flipBit(int index) noexcept
