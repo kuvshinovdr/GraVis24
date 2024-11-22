@@ -1,4 +1,4 @@
-/// @file adjacency_list.hpp
+п»ї/// @file adjacency_list.hpp
 #ifndef GRAVIS24_ADJACENCY_LIST_HPP
 #define GRAVIS24_ADJACENCY_LIST_HPP
 
@@ -8,7 +8,7 @@ namespace gravis24
 {
 
     ///////////////////////////////////////////////////////
-    // Интерфейс AdjacencyListView
+    // РРЅС‚РµСЂС„РµР№СЃ AdjacencyListView
 
     class AdjacencyListView
     {
@@ -24,39 +24,39 @@ namespace gravis24
         [[nodiscard]] virtual auto neighborsCount(int vertex) const noexcept
             -> int = 0;
 
-        /// @brief Если вершины нет (неверный индекс), возвращает пустой span.
+        /// @brief Р•СЃР»Рё РІРµСЂС€РёРЅС‹ РЅРµС‚ (РЅРµРІРµСЂРЅС‹Р№ РёРЅРґРµРєСЃ), РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ span.
         [[nodiscard]] virtual auto getNeighbors(int vertex) const noexcept
             -> std::span<int const> = 0;
     };
 
 
     ///////////////////////////////////////////////////////
-    // Интерфейс EditableAdjacencyList
+    // РРЅС‚РµСЂС„РµР№СЃ EditableAdjacencyList
 
     class EditableAdjacencyList
         : public AdjacencyListView
     {
     public:
-        /// @brief  Добавить новую вершину (получает наибольший индекс).
-        /// @return индекс добавленной вершины
+        /// @brief  Р”РѕР±Р°РІРёС‚СЊ РЅРѕРІСѓСЋ РІРµСЂС€РёРЅСѓ (РїРѕР»СѓС‡Р°РµС‚ РЅР°РёР±РѕР»СЊС€РёР№ РёРЅРґРµРєСЃ).
+        /// @return РёРЅРґРµРєСЃ РґРѕР±Р°РІР»РµРЅРЅРѕР№ РІРµСЂС€РёРЅС‹
         virtual auto addVertex() -> int = 0;
 
-        /// @brief        Добавить target в окрестность source.
-        /// @param source исходная вершина дуги
-        /// @param target целевая вершина дуги
-        /// @return       true, если дуга была добавлена, false иначе
+        /// @brief        Р”РѕР±Р°РІРёС‚СЊ target РІ РѕРєСЂРµСЃС‚РЅРѕСЃС‚СЊ source.
+        /// @param source РёСЃС…РѕРґРЅР°СЏ РІРµСЂС€РёРЅР° РґСѓРіРё
+        /// @param target С†РµР»РµРІР°СЏ РІРµСЂС€РёРЅР° РґСѓРіРё
+        /// @return       true, РµСЃР»Рё РґСѓРіР° Р±С‹Р»Р° РґРѕР±Р°РІР»РµРЅР°, false РёРЅР°С‡Рµ
         virtual bool connect(int source, int target) = 0;
 
-        /// @brief        Удалить target из окрестности source.
-        /// @param source исходная вершина дуги
-        /// @param target целевая вершина дуги
-        /// @return       true, если дуга была удалена, false иначе
+        /// @brief        РЈРґР°Р»РёС‚СЊ target РёР· РѕРєСЂРµСЃС‚РЅРѕСЃС‚Рё source.
+        /// @param source РёСЃС…РѕРґРЅР°СЏ РІРµСЂС€РёРЅР° РґСѓРіРё
+        /// @param target С†РµР»РµРІР°СЏ РІРµСЂС€РёРЅР° РґСѓРіРё
+        /// @return       true, РµСЃР»Рё РґСѓРіР° Р±С‹Р»Р° СѓРґР°Р»РµРЅР°, false РёРЅР°С‡Рµ
         virtual bool disconnect(int source, int target) = 0;
     };
 
 
     //////////////////////////////////////////////////
-    // Функции для создания объектов, реализующих
+    // Р¤СѓРЅРєС†РёРё РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РѕР±СЉРµРєС‚РѕРІ, СЂРµР°Р»РёР·СѓСЋС‰РёС…
     // EditableAdjacencyList
 
     [[nodiscard]] auto newAdjacencyListVector(int vertexCount = 0)
