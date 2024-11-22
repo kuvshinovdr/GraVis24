@@ -1,4 +1,4 @@
-/// @file adjacency_matrix.hpp
+п»ї/// @file adjacency_matrix.hpp
 #ifndef GRAVIS24_ADJACENCY_MATRIX_HPP
 #define GRAVIS24_ADJACENCY_MATRIX_HPP
 
@@ -20,7 +20,7 @@ namespace gravis24
                 : _data(data)
                 , _offset(firstBitOffset)
             {
-                // Пусто.
+                // РџСѓСЃС‚Рѕ.
             }
 
             [[nodiscard]] bool getBit(int index) const noexcept
@@ -51,8 +51,8 @@ namespace gravis24
         [[nodiscard]] virtual auto getVertexCount() const noexcept
             -> int = 0;
 
-        /// @brief Получить строку матрицы смежности
-        /// @param index < getVertexCount() или возвращает пустой (невалидный) Row
+        /// @brief РџРѕР»СѓС‡РёС‚СЊ СЃС‚СЂРѕРєСѓ РјР°С‚СЂРёС†С‹ СЃРјРµР¶РЅРѕСЃС‚Рё
+        /// @param index < getVertexCount() РёР»Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ (РЅРµРІР°Р»РёРґРЅС‹Р№) Row
         [[nodiscard]] virtual auto getRow(int index) const noexcept
             -> RowView = 0;
 
@@ -80,7 +80,7 @@ namespace gravis24
                 : _data(data)
                 , _offset(firstBitOffset)
             {
-                // Пусто.
+                // РџСѓСЃС‚Рѕ.
             }
 
             [[nodiscard]] operator RowView() const noexcept
@@ -160,7 +160,7 @@ namespace gravis24
 
             void setBit(int index, bool value) noexcept
             {
-                // Оптимизированная версия.                         // x86
+                // РћРїС‚РёРјРёР·РёСЂРѕРІР°РЅРЅР°СЏ РІРµСЂСЃРёСЏ.                         // x86
                 auto const bitIndex    = unsigned(index + _offset); // add
                 auto const chunk       = bitIndex / chunkBits;      // shr
                 auto const bitOffset   = bitIndex % chunkBits;      // and
@@ -188,7 +188,7 @@ namespace gravis24
             return getRow(index);
         }
 
-        // UB если неверные i, j!
+        // UB РµСЃР»Рё РЅРµРІРµСЂРЅС‹Рµ i, j!
         [[nodiscard]] bool get(int i, int j) const noexcept
         {
             return getRow(i).getBit(j);
