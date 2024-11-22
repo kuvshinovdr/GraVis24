@@ -3,7 +3,7 @@
 #define GRAVIS24_GRAPH_HPP
 
 #include "edge_list.hpp"
-#include "adjacency_matrix.hpp"
+#include "dense_adjacency_matrix.hpp"
 #include "adjacency_list.hpp"
 
 #include <climits>
@@ -17,26 +17,6 @@ namespace gravis24
         float x;
         float y;
         float z;
-    };
-
-
-    class AdjacencyListView
-    {
-    public:
-        virtual ~AdjacencyListView() = default;
-
-        [[nodiscard]] virtual auto getVertexCount() const noexcept
-            -> int = 0;
-
-        [[nodiscard]] virtual bool areConnected(int source, int target) const noexcept 
-            = 0;
-
-        [[nodiscard]] virtual auto neighborsCount(int vertex) const noexcept
-            -> int = 0;
-
-        /// @brief Если вершины нет (неверный индекс), возвращает пустой span.
-        [[nodiscard]] virtual auto getNeighbors(int vertex) const noexcept
-            -> std::span<int const> = 0;
     };
 
 

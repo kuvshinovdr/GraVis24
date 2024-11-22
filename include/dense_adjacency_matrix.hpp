@@ -1,11 +1,17 @@
-﻿/// @file adjacency_matrix.hpp
-#ifndef GRAVIS24_ADJACENCY_MATRIX_HPP
-#define GRAVIS24_ADJACENCY_MATRIX_HPP
+﻿/// @file dense_adjacency_matrix.hpp
+#ifndef GRAVIS24_DENSE_ADJACENCY_MATRIX_HPP
+#define GRAVIS24_DENSE_ADJACENCY_MATRIX_HPP
+
+#include <cstdint>
+#include <memory>
 
 namespace gravis24
 {
 
-    class AdjacencyMatrixView
+    //////////////////////////////////////////////////
+    // Интерфейс DenseAdjacencyMatrixView
+
+    class DenseAdjacencyMatrixView
     {
     public:
         class RowView
@@ -46,7 +52,7 @@ namespace gravis24
             int          _offset {};
         };
 
-        virtual ~AdjacencyMatrixView() = default;
+        virtual ~DenseAdjacencyMatrixView() = default;
 
         [[nodiscard]] virtual auto getVertexCount() const noexcept
             -> int = 0;
@@ -64,8 +70,11 @@ namespace gravis24
     };
 
 
-    class EditableAdjacencyMatrix
-        : public AdjacencyMatrixView
+    //////////////////////////////////////////////////
+    // Интерфейс EditableDenseAdjacencyMatrix
+
+    class EditableDenseAdjacencyMatrix
+        : public DenseAdjacencyMatrixView
     {
     public:
         class Row
@@ -215,6 +224,15 @@ namespace gravis24
         }
     };
 
+
+    //////////////////////////////////////////////////
+    // Функции для создания объектов, реализующих
+    // EditableAdjacencyMatrix
+
+    [[nodiscard]] auto newDenseAdjacencyMatrix(int vertexCount)
+        -> std::unique_ptr<EditableDenseAdjacencyMatrix>;
+
+
 }
 
-#endif//GRAVIS24_ADJACENCY_MATRIX_HPP
+#endif//GRAVIS24_DENSE_ADJACENCY_MATRIX_HPP

@@ -17,6 +17,9 @@ namespace gravis24
     };
 
 
+    //////////////////////////////////////////////////
+    // Интерфейс EdgeListView
+
     class EdgeListView
     {
     public:
@@ -45,6 +48,9 @@ namespace gravis24
             -> std::span<float const> = 0;
     };
 
+
+    //////////////////////////////////////////////////
+    // Интерфейс EditableEdgeList
 
     class EditableEdgeList
         : public EdgeListView
