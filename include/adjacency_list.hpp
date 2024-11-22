@@ -27,6 +27,38 @@ namespace gravis24
         /// @brief Если вершины нет (неверный индекс), возвращает пустой span.
         [[nodiscard]] virtual auto getNeighbors(int vertex) const noexcept
             -> std::span<int const> = 0;
+
+        /// @brief           Получить значение целочисленного атрибута вершины.
+        /// @param vertex    номер вершины, которой принадлежит атрибут
+        /// @param attribute номер атрибута
+        /// @return          значение атрибута; возвращает 0, если атрибут не существует
+        [[nodiscard]] virtual auto getVertexIntAttribute(int vertex, int attribute) const noexcept
+            -> int = 0;
+
+        /// @brief           Получить значение атрибута типа float заданной вершины.
+        /// @param vertex    номер вершины, которой принадлежит атрибут
+        /// @param attribute номер атрибута
+        /// @return          значение атрибута; возвращает 0, если атрибут не существует
+        [[nodiscard]] virtual auto getVertexFloatAttribute(int vertex, int attribute) const noexcept 
+            -> float = 0;
+
+        /// @brief           Получить значение целочисленного атрибута дуги.
+        /// @param source    номер исходной вершины дуги
+        /// @param target    номер целевой вершины дуги
+        /// @param attribute номер атрибута
+        /// @return          значение атрибута; возвращает 0, если атрибут не существует
+        [[nodiscard]] virtual auto getArcIntAttribute(
+            int source, int target, int attribute) const noexcept
+            -> int = 0;
+
+        /// @brief           Получить значение атрибута типа float заданной дуги.
+        /// @param source    номер исходной вершины дуги
+        /// @param target    номер целевой вершины дуги
+        /// @param attribute номер атрибута
+        /// @return          значение атрибута; возвращает 0, если атрибут не существует
+        [[nodiscard]] virtual auto getArcFloatAttribute(
+            int source, int target, int attribute) const noexcept 
+            -> float = 0;
     };
 
 
@@ -52,6 +84,36 @@ namespace gravis24
         /// @param target целевая вершина дуги
         /// @return       true, если дуга была удалена, false иначе
         virtual bool disconnect(int source, int target) = 0;
+
+        /// @brief           Установить значение целочисленного атрибута вершины.
+        /// @param vertex    номер вершины, которой принадлежит атрибут
+        /// @param attribute номер атрибута
+        /// @param value     значение атрибута
+        virtual void setVertexIntAttribute(
+            int vertex, int attribute, int value) = 0;
+
+        /// @brief           Установить значение атрибута типа float заданной вершины.
+        /// @param vertex    номер вершины, которой принадлежит атрибут
+        /// @param attribute номер атрибута
+        /// @param value     значение атрибута
+        virtual void setVertexFloatAttribute(
+            int vertex, int attribute, float value) = 0;
+
+        /// @brief           Установить значение целочисленного атрибута дуги.
+        /// @param source    номер исходной вершины дуги
+        /// @param target    номер целевой вершины дуги
+        /// @param attribute номер атрибута
+        /// @param value     значение атрибута
+        virtual void setArcIntAttribute(
+            int source, int target, int attribute, int value) = 0;
+
+        /// @brief           Установить значение атрибута типа float заданной дуги.
+        /// @param source    номер исходной вершины дуги
+        /// @param target    номер целевой вершины дуги
+        /// @param attribute номер атрибута
+        /// @param value     значение атрибута
+        [[nodiscard]] virtual void getArcFloatAttribute(
+            int source, int target, int attribute, float value) = 0;
     };
 
 

@@ -23,14 +23,9 @@ namespace gravis24
 
         [[nodiscard]] bool areConnected(int source, int target) const noexcept override
         {
-            if (_adj.size() <= static_cast<size_t>(source))
-                return false;
-
-            for (auto v: _adj[source])
-                if (v == target)
-                    return true;
-
-            return false;
+            return _adj.size() <= static_cast<size_t>(source)
+                && std::ranges::contains(_adj[source].arcs, 
+                    [](ArcData const& ad) { return ad.target; });
         }
 
         [[nodiscard]] auto neighborsCount(int vertex) const noexcept
@@ -50,6 +45,32 @@ namespace gravis24
                 return {};
 
             return _adj[vertex];
+        }
+
+        [[nodiscard]] auto getVertexIntAttribute(int vertex, int attribute) const noexcept
+            -> int override
+        {
+
+        }
+
+        [[nodiscard]] auto getVertexFloatAttribute(int vertex, int attribute) const noexcept
+            -> float override
+        {
+
+        }
+
+        [[nodiscard]] auto getArcIntAttribute(
+            int source, int target, int attribute) const noexcept
+            -> int override
+        {
+
+        }
+
+        [[nodiscard]] auto getArcFloatAttribute(
+            int source, int target, int attribute) const noexcept
+            -> float override
+        {
+
         }
 
         /////////////////////////////////////////////////////
@@ -80,6 +101,31 @@ namespace gravis24
             return std::ranges::contains(_adj[source], target);
         }
 
+        void setVertexIntAttribute(
+            int vertex, int attribute, int value) override
+        {
+
+        }
+
+        void setVertexFloatAttribute(
+            int vertex, int attribute, float value) override
+        {
+
+        }
+
+        void setArcIntAttribute(
+            int source, int target, int attribute, int value) override
+        {
+
+        }
+
+        virtual void getArcFloatAttribute(
+            int source, int target, int attribute, float value) override
+        {
+
+        }
+
+
         /////////////////////////////////////////////////////
         // Операции конструирования
 
@@ -92,7 +138,20 @@ namespace gravis24
         }
 
     private:
-        using Adjacency = std::vector<int>;
+        struct ArcData
+        {
+            int                target;
+            std::vector<int>   intAttrs;
+            std::vector<float> floatAttrs;
+        };
+
+        struct Adjacency
+        {
+            std::vector<ArcData> arcs;
+            std::vector<int>     intAttrs;
+            std::vector<float>   floatAttrs;
+        };
+
         std::vector<Adjacency> _adj;
     };
 
