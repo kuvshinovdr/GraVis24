@@ -3,6 +3,8 @@
 #define GRAVIS24_GRAPH_HPP
 
 #include "edge_list.hpp"
+#include "adjacency_matrix.hpp"
+#include "adjacency_list.hpp"
 
 #include <climits>
 #include <cstdint>
@@ -15,65 +17,6 @@ namespace gravis24
         float x;
         float y;
         float z;
-    };
-
-
-    class AdjacencyMatrixView
-    {
-    public:
-        class RowView
-        {
-        public:
-            using Chunk = uint32_t;
-            static constexpr auto chunkBits = 8 * sizeof(Chunk);
-
-            RowView() noexcept = default;
-
-            explicit RowView(Chunk const* data, int firstBitOffset = 0) noexcept
-                : _data(data)
-                , _offset(firstBitOffset)
-            {
-                // Пусто.
-            }
-            
-            [[nodiscard]] bool getBit(int index) const noexcept
-            {
-                auto const bitIndex  = unsigned(index + _offset);
-                auto const chunk     = bitIndex / chunkBits;
-                auto const bitOffset = bitIndex % chunkBits;
-                return ((_data[chunk] >> bit_offset) & 1) == 1;
-            }
-
-            [[nodiscard]] bool operator[](int index) const noexcept
-            {
-                return get(index);
-            }
-
-            [[nodiscard]] bool isValid() const noexcept
-            {
-                return _data != nullptr;
-            }
-
-        private:
-            Chunk const* _data   {};
-            int          _offset {};
-        };
-
-        virtual ~AdjacencyMatrixView() = default;
-
-        [[nodiscard]] virtual auto getVertexCount() const noexcept
-            -> int = 0;
-        
-        /// @brief Получить строку матрицы смежности
-        /// @param index < getVertexCount() или возвращает пустой (невалидный) Row
-        [[nodiscard]] virtual auto getRow(int index) const noexcept
-            -> RowView = 0;
-
-        [[nodiscard]] auto operator[](int index) const noexcept
-            -> RowView
-        {
-            return getRow(index);
-        }
     };
 
 

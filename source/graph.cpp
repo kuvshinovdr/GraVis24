@@ -91,12 +91,14 @@ namespace gravis24
 
             void reset(int firstBit, int untilBit) noexcept
             {
+                // TODO: test this code
                 auto const beginBit    = unsigned(firstBit + _offset);
                 auto const endBit      = unsigned(untilBit + _offset);
                 auto const beginChunk  = beginBit / chunkBits;
                 auto const beginOffset = beginBit % chunkBits;
                 auto const endChunk    = endBit / chunkBits;
                 auto const endOffset   = endBit % chunkBits;
+                
                 if (beginChunk == endChunk)
                 {
                     auto const chunk = _data[beginChunk];
@@ -104,6 +106,19 @@ namespace gravis24
                     auto const m2    = (Chunk{1} << (endOffset + 1)) - 1;
                     auto const m3    = ~m1 | m2;
                     _data[beginChunk] &= m3;
+                }
+                else
+                {
+                    auto const chunk = _data[beginChunk];
+                    auto const m1    = (Chunk{1} << beginOffset) - 1;
+                    _data[beginChunk] &= ~m1;
+
+                    for (unsigned chunk = beginChunk + 1;
+                            chunk < endChunk; ++chunk)
+                        _data[chunk] = Chunk{};
+
+                    auto const m2    = (Chunk{1} << (endOffset + 1)) - 1;
+                    _data[endChunk] &= m2;
                 }
             }
 
