@@ -1,4 +1,4 @@
-/// @file edge_list.hpp
+п»ї/// @file edge_list.hpp
 #ifndef GRAVIS24_EDGE_LIST_HPP
 #define GRAVIS24_EDGE_LIST_HPP
 
@@ -22,25 +22,25 @@ namespace gravis24
     public:
         virtual ~EdgeListView() = default;
 
-        /// @brief Получить все рёбра.
+        /// @brief РџРѕР»СѓС‡РёС‚СЊ РІСЃРµ СЂС‘Р±СЂР°.
         [[nodiscard]] virtual auto getEdges() const noexcept
             -> std::span<Arc const> = 0;
 
-        /// @brief Узнать сколько целочисленных атрибутов назначено на рёбра.
+        /// @brief РЈР·РЅР°С‚СЊ СЃРєРѕР»СЊРєРѕ С†РµР»РѕС‡РёСЃР»РµРЅРЅС‹С… Р°С‚СЂРёР±СѓС‚РѕРІ РЅР°Р·РЅР°С‡РµРЅРѕ РЅР° СЂС‘Р±СЂР°.
         [[nodiscard]] virtual auto getIntAttributeCount() const noexcept
             -> int = 0;
 
-        /// @brief Получить массив целочисленных атрибутов для всех рёбер (индекс ребра как в getEdges).
-        /// @param attributeIndex < getIntAttributeCount() или возвращает пустой span
+        /// @brief РџРѕР»СѓС‡РёС‚СЊ РјР°СЃСЃРёРІ С†РµР»РѕС‡РёСЃР»РµРЅРЅС‹С… Р°С‚СЂРёР±СѓС‚РѕРІ РґР»СЏ РІСЃРµС… СЂС‘Р±РµСЂ (РёРЅРґРµРєСЃ СЂРµР±СЂР° РєР°Рє РІ getEdges).
+        /// @param attributeIndex < getIntAttributeCount() РёР»Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ span
         [[nodiscard]] virtual auto getIntAttributes(int attributeIndex) const noexcept
             -> std::span<int const> = 0;
 
-        /// @brief Узнать сколько атрибутов типа float назначено на рёбра.
+        /// @brief РЈР·РЅР°С‚СЊ СЃРєРѕР»СЊРєРѕ Р°С‚СЂРёР±СѓС‚РѕРІ С‚РёРїР° float РЅР°Р·РЅР°С‡РµРЅРѕ РЅР° СЂС‘Р±СЂР°.
         [[nodiscard]] virtual auto getFloatAttributeCount() const noexcept
             -> int = 0;
 
-        /// @brief Получить массив атрибутов float для всех рёбер (индекс ребра как в getEdges).
-        /// @param attributeIndex < getFloatAttributeCount() или возвращает пустой span
+        /// @brief РџРѕР»СѓС‡РёС‚СЊ РјР°СЃСЃРёРІ Р°С‚СЂРёР±СѓС‚РѕРІ float РґР»СЏ РІСЃРµС… СЂС‘Р±РµСЂ (РёРЅРґРµРєСЃ СЂРµР±СЂР° РєР°Рє РІ getEdges).
+        /// @param attributeIndex < getFloatAttributeCount() РёР»Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РїСѓСЃС‚РѕР№ span
         [[nodiscard]] virtual auto getFloatAttributes(int attributeIndex) const noexcept
             -> std::span<float const> = 0;
     };
@@ -50,22 +50,23 @@ namespace gravis24
         : public EdgeListView
     {
     public:
-        /// @brief        Добавить дугу.
-        /// @param source исходная вершина
-        /// @param target целевая вершина
-        /// @return       номер дуги, соединяющей source и target
+        /// @brief        Р”РѕР±Р°РІРёС‚СЊ РґСѓРіСѓ.
+        /// @param source РёСЃС…РѕРґРЅР°СЏ РІРµСЂС€РёРЅР°
+        /// @param target С†РµР»РµРІР°СЏ РІРµСЂС€РёРЅР°
+        /// @return       РЅРѕРјРµСЂ РґСѓРіРё, СЃРѕРµРґРёРЅСЏСЋС‰РµР№ source Рё target
         virtual auto connect(int source, int target)
             -> int = 0;
 
-        /// @brief        Проверить, есть ли дуга, соединяющая заданные вершины.
-        /// @param source исходная вершина
-        /// @param target целевая вершина
-        [[nodiscard]] virtual bool areConnected(int source, int target) const noexcept = 0;
+        /// @brief        РџСЂРѕРІРµСЂРёС‚СЊ, РµСЃС‚СЊ Р»Рё РґСѓРіР°, СЃРѕРµРґРёРЅСЏСЋС‰Р°СЏ Р·Р°РґР°РЅРЅС‹Рµ РІРµСЂС€РёРЅС‹.
+        /// @param source РёСЃС…РѕРґРЅР°СЏ РІРµСЂС€РёРЅР°
+        /// @param target С†РµР»РµРІР°СЏ РІРµСЂС€РёРЅР°
+        [[nodiscard]] virtual bool areConnected(
+                int source, int target) const noexcept = 0;
 
-        /// @brief        Удалить дугу, если она есть.
-        /// @param source исходная вершина
-        /// @param target целевая вершина
-        /// @return       true, если дуга была удалена, иначе false
+        /// @brief        РЈРґР°Р»РёС‚СЊ РґСѓРіСѓ, РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ.
+        /// @param source РёСЃС…РѕРґРЅР°СЏ РІРµСЂС€РёРЅР°
+        /// @param target С†РµР»РµРІР°СЏ РІРµСЂС€РёРЅР°
+        /// @return       true, РµСЃР»Рё РґСѓРіР° Р±С‹Р»Р° СѓРґР°Р»РµРЅР°, РёРЅР°С‡Рµ false
         virtual bool disconnect(int source, int target) = 0;
 
         [[nodiscard]] virtual auto getIntAttributes(int attributeIndex) noexcept
@@ -77,7 +78,7 @@ namespace gravis24
 
 
     //////////////////////////////////////////////////
-    // Функции для создания объектов, реализующих
+    // Р¤СѓРЅРєС†РёРё РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РѕР±СЉРµРєС‚РѕРІ, СЂРµР°Р»РёР·СѓСЋС‰РёС…
     // EditableEdgeList
 
     [[nodiscard]] auto newEdgeListUnsortedVector(

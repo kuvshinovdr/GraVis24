@@ -1,5 +1,5 @@
-/// @file  edge_list_unsorted_vector.cpp
-/// @brief Реализация EditableEdgeList на основе неупорядоченного вектора.
+п»ї/// @file  edge_list_unsorted_vector.cpp
+/// @brief Р РµР°Р»РёР·Р°С†РёСЏ EditableEdgeList РЅР° РѕСЃРЅРѕРІРµ РЅРµСѓРїРѕСЂСЏРґРѕС‡РµРЅРЅРѕРіРѕ РІРµРєС‚РѕСЂР°.
 
 #include "../include/edge_list.hpp"
 
@@ -14,7 +14,7 @@ namespace gravis24
     {
     public:
         /////////////////////////////////////////////////////
-        // Реализация интерфейса EdgeListView
+        // Р РµР°Р»РёР·Р°С†РёСЏ РёРЅС‚РµСЂС„РµР№СЃР° EdgeListView
 
         [[nodiscard]] auto getEdges() const noexcept
             -> std::span<Arc const> override
@@ -53,9 +53,9 @@ namespace gravis24
         }
 
         /////////////////////////////////////////////////////
-        // Реализация интерфейса EditableEdgeList
+        // Р РµР°Р»РёР·Р°С†РёСЏ РёРЅС‚РµСЂС„РµР№СЃР° EditableEdgeList
 
-        // Не соблюдает инвариант уникальности дуг.
+        // РќРµ СЃРѕР±Р»СЋРґР°РµС‚ РёРЅРІР°СЂРёР°РЅС‚ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё РґСѓРі.
         int connect(int source, int target) override
         {
             auto const result = static_cast<int>(_arcs.size());
@@ -95,7 +95,7 @@ namespace gravis24
         }
 
         //////////////////////////////////////////////
-        // Конструкторы
+        // РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂС‹
 
         EdgeListUnsortedVector() noexcept = default;
 
