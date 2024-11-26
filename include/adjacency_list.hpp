@@ -2,6 +2,7 @@
 #ifndef GRAVIS24_ADJACENCY_LIST_HPP
 #define GRAVIS24_ADJACENCY_LIST_HPP
 
+#include <span>
 #include <memory>
 
 namespace gravis24
@@ -112,7 +113,7 @@ namespace gravis24
         /// @param target    номер целевой вершины дуги
         /// @param attribute номер атрибута
         /// @param value     значение атрибута
-        [[nodiscard]] virtual void getArcFloatAttribute(
+        [[nodiscard]] virtual void setArcFloatAttribute(
             int source, int target, int attribute, float value) = 0;
     };
 

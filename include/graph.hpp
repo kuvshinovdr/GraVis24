@@ -130,8 +130,13 @@ namespace gravis24
 
         [[nodiscard]] virtual auto getVertexPositions() const noexcept
             -> std::span<XYZ const> = 0;
+
         [[nodiscard]] virtual auto getVertexPositions() noexcept
             -> ChangeableVertexPositions = 0;
+
+        // Отдельная обработка атрибутов вершин и рёбер
+
+
 
     private:
         virtual void onVertexPositionsChange() noexcept = 0;
