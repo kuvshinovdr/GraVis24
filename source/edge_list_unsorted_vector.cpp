@@ -25,7 +25,7 @@ namespace gravis24
         [[nodiscard]] auto getIntAttributeCount() const noexcept
             -> int override
         {
-            return static_cast<_intAttrs.size()>;
+            return static_cast<int>(_intAttrs.size());
         }
 
         [[nodiscard]] auto getIntAttributes(int attributeIndex) const noexcept
@@ -40,7 +40,7 @@ namespace gravis24
         [[nodiscard]] auto getFloatAttributeCount() const noexcept
             -> int override
         {
-            return static_cast<_floatAttrs.size()>;
+            return static_cast<int>(_floatAttrs.size());
         }
 
         [[nodiscard]] auto getFloatAttributes(int attributeIndex) const noexcept

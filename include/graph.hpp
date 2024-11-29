@@ -38,7 +38,7 @@ namespace gravis24
         [[nodiscard]] virtual bool hasAdjacencyMatrixView() const noexcept
             = 0;
         [[nodiscard]] virtual auto getAdjacencyMatrixView() const
-            -> AdjacencyMatrixView const& = 0;
+            -> DenseAdjacencyMatrixView const& = 0;
 
         [[nodiscard]] virtual bool hasAdjacencyListView() const noexcept
             = 0;
@@ -61,72 +61,8 @@ namespace gravis24
 
         virtual bool areConnected(int source, int target) const noexcept
             = 0;
-
-        friend class ChangeableVertexPositions
-        {
-        public:
-            ChangeableVertexPositions(Graph& graph, std::span<XYZ> vertexPositions)
-                : _graph(graph)
-                , _vertexPositions(vertexPositions)
-            {
-                // Пусто.
-            }
-
-            [[nodiscard]] bool empty() const noexcept
-            {
-                return _vertexPositions.empty();
-            }
-
-            [[nodiscard]] auto size() const noexcept
-                -> int
-            {
-                return static_cast<int>(_vertexPositions.size());
-            }
-
-            [[nodiscard]] auto operator[](int index) const noexcept
-                -> XYZ const&
-            {
-                return _vertexPositions[index];
-            }
-
-            [[nodiscard]] auto getSpan() const noexcept
-            {
-                return _vertexPositions;
-            }
-            
-            [[nodiscard]] auto begin() const noexcept
-            {
-                return _vertexPositions.begin();
-            }
-
-            [[nodiscard]] auto end() const noexcept
-            {
-                return _vertexPositions.end();
-            }
-
-            [[nodiscard]] auto getGraph() const noexcept
-                -> Graph&
-            {
-                return _graph;
-            }
-
-            ~ChangeableVertexPositions()
-            {
-                _graph.onVertexPositionsChange();
-            }
-
-        private:
-            ChangeableVertexPositions(ChangeableVertexPositions const&) 
-                = delete;
-            auto operator=(ChangeableVertexPositions const&)
-                -> ChangeableVertexPositions& = delete;
-            // Также автоматически отключает 
-            // перемещающие конструктор и оператор=.
-
-            Graph&         _graph;
-            std::span<XYZ> _vertexPositions;
-        };
-
+        
+        friend class ChangeableVertexPositions;
 
         [[nodiscard]] virtual auto getVertexPositions() const noexcept
             -> std::span<XYZ const> = 0;
@@ -140,6 +76,74 @@ namespace gravis24
 
     private:
         virtual void onVertexPositionsChange() noexcept = 0;
+    };
+
+
+    // Данный класс нужен, чтобы вызвать Graph::onVertexPositionsChange
+    // после изменений значений координат вершин (в деструкторе).
+    class ChangeableVertexPositions
+    {
+    public:
+        ChangeableVertexPositions(Graph& graph, std::span<XYZ> vertexPositions)
+            : _graph(graph)
+            , _vertexPositions(vertexPositions)
+        {
+            // Пусто.
+        }
+
+        [[nodiscard]] bool empty() const noexcept
+        {
+            return _vertexPositions.empty();
+        }
+
+        [[nodiscard]] auto size() const noexcept
+            -> int
+        {
+            return static_cast<int>(_vertexPositions.size());
+        }
+
+        [[nodiscard]] auto operator[](int index) const noexcept
+            -> XYZ const&
+        {
+            return _vertexPositions[index];
+        }
+
+        [[nodiscard]] auto getSpan() const noexcept
+        {
+            return _vertexPositions;
+        }
+
+        [[nodiscard]] auto begin() const noexcept
+        {
+            return _vertexPositions.begin();
+        }
+
+        [[nodiscard]] auto end() const noexcept
+        {
+            return _vertexPositions.end();
+        }
+
+        [[nodiscard]] auto getGraph() const noexcept
+            -> Graph&
+        {
+            return _graph;
+        }
+
+        ~ChangeableVertexPositions()
+        {
+            _graph.onVertexPositionsChange();
+        }
+
+    private:
+        ChangeableVertexPositions(ChangeableVertexPositions const&) 
+            = delete;
+        auto operator=(ChangeableVertexPositions const&)
+            -> ChangeableVertexPositions& = delete;
+        // Также автоматически отключает 
+        // перемещающие конструктор и оператор=.
+
+        Graph&         _graph;
+        std::span<XYZ> _vertexPositions;
     };
 
 }

@@ -14,12 +14,12 @@ namespace gravis24
     class DenseAdjacencyMatrixView
     {
     public:
+        using Chunk = uint32_t;
+        static constexpr auto chunkBits = 8 * sizeof(Chunk);
+
         class RowView
         {
         public:
-            using Chunk = uint32_t;
-            static constexpr auto chunkBits = 8 * sizeof(Chunk);
-
             RowView() noexcept = default;
 
             explicit RowView(Chunk const* data, int firstBitOffset = 0) noexcept
@@ -34,12 +34,12 @@ namespace gravis24
                 auto const bitIndex  = unsigned(index + _offset);
                 auto const chunk     = bitIndex / chunkBits;
                 auto const bitOffset = bitIndex % chunkBits;
-                return ((_data[chunk] >> bit_offset) & 1) == 1;
+                return ((_data[chunk] >> bitOffset) & 1) == 1;
             }
 
             [[nodiscard]] bool operator[](int index) const noexcept
             {
-                return get(index);
+                return getBit(index);
             }
 
             [[nodiscard]] bool isValid() const noexcept
@@ -80,9 +80,6 @@ namespace gravis24
         class Row
         {
         public:
-            using Chunk = uint32_t;
-            static constexpr auto chunkBits = 8 * sizeof(Chunk);
-
             Row() noexcept = default;
 
             explicit Row(Chunk* data, int firstBitOffset = 0) noexcept
@@ -92,9 +89,9 @@ namespace gravis24
                 // Пусто.
             }
 
-            [[nodiscard]] operator RowView() const noexcept
+            [[nodiscard]] operator DenseAdjacencyMatrixView::RowView() const noexcept
             {
-                return { _data, _offset };
+                return DenseAdjacencyMatrixView::RowView { _data, _offset };
             }
 
             [[nodiscard]] bool isValid() const noexcept
@@ -107,7 +104,7 @@ namespace gravis24
                 auto const bitIndex  = unsigned(index + _offset);
                 auto const chunk     = bitIndex / chunkBits;
                 auto const bitOffset = bitIndex % chunkBits;
-                return ((_data[chunk] >> bit_offset) & 1) == 1;
+                return ((_data[chunk] >> bitOffset) & 1) == 1;
             }
 
             void resetBit(int index) noexcept
@@ -186,11 +183,11 @@ namespace gravis24
             int    _offset {};
         };
 
-
+        using DenseAdjacencyMatrixView::getRow;
         [[nodiscard]] virtual auto getRow(int index) noexcept
             -> Row = 0;
 
-        using AdjacencyListView::operator[];
+        using DenseAdjacencyMatrixView::operator[];
         [[nodiscard]] auto operator[](int index) noexcept
             -> Row
         {

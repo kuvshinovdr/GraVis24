@@ -138,8 +138,8 @@ namespace gravis24
 
                 if (0 < oldSize && oldSize < newSize)
                 {
-                    auto const intAttrsCount   = _arcsAttrs[0].getIntAttrs().size();
-                    auto const floatAttrsCount = _arcsAttrs[0].getFloatAttrs().size();
+                    auto const intAttrsCount   = static_cast<int>(_arcsAttrs[0].getIntAttrs().size());
+                    auto const floatAttrsCount = static_cast<int>(_arcsAttrs[0].getFloatAttrs().size());
 
                     for (size_t i = oldSize; i < newSize; ++i)
                     {
@@ -452,42 +452,37 @@ namespace gravis24
         template <typename AttrType, typename Self>
         [[nodiscard]] auto getArcAttrs(this Self&& self, int source, int target) noexcept
         {
+            using Result = decltype(self._vd[0].getArcsAttrs()[0].template getAttrs<AttrType>());
             if (self.isValidVertex(source))
             {
                 auto& sourceData = self._vd[source];
-                auto& targets    = sourceData.getTargets();
-                auto  it         = std::ranges::find(targets, target);
+                auto  targets    = sourceData.getTargets();
+                auto const it    = std::ranges::find(targets, target);
                 if (it != targets.end())
                 {
-                    auto  index = std::distance(targets.begin(), it);
-                    return sourceData.getArcsAttrs()[index]
+                    auto const index = std::distance(targets.begin(), it);
+                    return sourceData.getArcsAttrs()[index].template getAttrs<AttrType>();
                 }
             }
+            
+            return Result{};
         }
 
 
-        [[nodiscard]] bool isValidIntArcAttr(int source, int target, int attrIndex) const noexcept
+        [[nodiscard]] bool isValidArcIntAttr(int source, int target, int attrIndex) const noexcept
         {
             
-            return static_cast<size_t>(attrIndex) < attrs.size();
+            return static_cast<size_t>(attrIndex) < getArcAttrs<int>(source, target).size();
         }
 
-        [[nodiscard]] bool isValidFloatArcAttr(int source, int target, int attrIndex) const noexcept
+        [[nodiscard]] bool isValidArcFloatAttr(int source, int target, int attrIndex) const noexcept
         {
-            return isValidVertex(source) 
-                && static_cast<size_t>(attrIndex) < _vd[vertexIndex].floatAttrs.size();
-        }
-
-        [[nodiscard]] static auto arcIndex(VertexData const& vd, int target) noexcept
-        {
-            return std::distance(vd.arcs.begin(),
-                std::ranges::find(vd.arcs, target,
-                    [](ArcData const& ad) { return ad.target; }));
+            return static_cast<size_t>(attrIndex) < getArcAttrs<float>(source, target).size();
         }
     };
 
 
-    auto newAdjacencyListVector(int vertexCount = 0)
+    auto newAdjacencyListVector(int vertexCount)
         -> std::unique_ptr<EditableAdjacencyList>
     {
         return std::make_unique<AdjacencyListVector>(vertexCount);
