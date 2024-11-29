@@ -113,7 +113,7 @@ namespace gravis24
         /// @param target    номер целевой вершины дуги
         /// @param attribute номер атрибута
         /// @param value     значение атрибута
-        [[nodiscard]] virtual void setArcFloatAttribute(
+        virtual void setArcFloatAttribute(
             int source, int target, int attribute, float value) = 0;
     };
 

@@ -9,7 +9,7 @@
 namespace gravis24
 {
 
-    class EdgeListUnsortedVector 
+    class EdgeListUnsortedVector final
         : public EditableEdgeList
     {
     public:

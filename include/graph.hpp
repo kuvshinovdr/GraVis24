@@ -75,7 +75,7 @@ namespace gravis24
 
 
     private:
-        virtual void onVertexPositionsChange() noexcept = 0;
+        virtual void onVertexPositionsChange() noexcept {}
     };
 
 

@@ -6,7 +6,7 @@
 namespace gravis24
 {
 
-    class DenseAdjacencyMatrix
+    class DenseAdjacencyMatrix final
         : public EditableDenseAdjacencyMatrix
     {
     public:
