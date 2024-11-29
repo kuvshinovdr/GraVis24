@@ -134,6 +134,16 @@
     <ClCompile Include="..\source\edge_list_unsorted_vector.cpp" />
     <ClCompile Include="..\source\graph.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\adjacency_list.hpp" />
+    <ClInclude Include="..\include\algorithm_dfs.hpp" />
+    <ClInclude Include="..\include\dense_adjacency_matrix.hpp" />
+    <ClInclude Include="..\include\edge_list.hpp" />
+    <ClInclude Include="..\include\event.hpp" />
+    <ClInclude Include="..\include\event_listener.hpp" />
+    <ClInclude Include="..\include\event_source.hpp" />
+    <ClInclude Include="..\include\graph.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

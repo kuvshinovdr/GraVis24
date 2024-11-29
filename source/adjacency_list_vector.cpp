@@ -22,7 +22,7 @@ namespace gravis24
         public:
             void resizeIntAttrs(int count)
             {
-                _intAttrs.resize(count);
+                _intAttrs.resize(static_cast<size_t>(count));
             }
 
             void reserveIntAttrs(int capacity)
@@ -252,13 +252,18 @@ namespace gravis24
         public:
             using Base::empty;
             using Base::data;
-            using Base::size;
             using Base::begin;
             using Base::end;
             using Base::front;
             using Base::back;
             using Base::operator[];
             using Base::reserve;
+
+            [[nodiscard]] auto size() const noexcept
+                -> int
+            {
+                return static_cast<int>(Base::size());
+            }
 
             // Задать правильные размеры для новых вложенных массивов.
             void resize(int count)
@@ -270,14 +275,15 @@ namespace gravis24
 
                 if (0 < oldSize && oldSize < newSize)
                 {
-                    auto const intAttrsCount   = front().getIntAttrs().size();
-                    auto const floatAttrsCount = front().getFloatAttrs().size();
+                    auto const intAttrsCount   = static_cast<int>(front().getIntAttrs().size());
+                    auto const floatAttrsCount = static_cast<int>(front().getFloatAttrs().size());
 
-                    auto const arcAttrs = front().getArcsAttrs();
+                    auto const arcAttrs = 
+                        front().getArcsAttrs();
                     auto const arcIntAttrsCount = 
-                        arcAttrs.empty()? 0: arcAttrs.front().getIntAttrs().size();
+                        arcAttrs.empty()? 0: static_cast<int>(arcAttrs.front().getIntAttrs().size());
                     auto const arcFloatAttrsCount = 
-                        arcAttrs.empty()? 0: arcAttrs.front().getFloatAttrs().size();
+                        arcAttrs.empty()? 0: static_cast<int>(arcAttrs.front().getFloatAttrs().size());
 
                     for (size_t i = oldSize; i < newSize; ++i)
                     {
@@ -294,7 +300,7 @@ namespace gravis24
     }
 
 
-    class AdjacencyListVector
+    class AdjacencyListVector final
         : public EditableAdjacencyList
     {
     public:
@@ -316,8 +322,7 @@ namespace gravis24
         [[nodiscard]] auto neighborsCount(int vertex) const noexcept
             -> int override
         {
-            return isValidVertex(vertex)?
-                static_cast<int>(_vd[vertex].getTargets().size()): 0;
+            return static_cast<int>(getNeighbors(vertex).size());
         }
 
         /// @brief Если вершины нет (неверный индекс), возвращает пустой span.
@@ -337,14 +342,14 @@ namespace gravis24
         [[nodiscard]] auto getVertexIntAttribute(int vertex, int attribute) const noexcept
             -> int override
         {
-            return isValidIntVertexAttr(vertex, attribute)?
+            return isValidVertexIntAttr(vertex, attribute)?
                 _vd[vertex].getIntAttrs()[attribute]: 0;
         }
 
         [[nodiscard]] auto getVertexFloatAttribute(int vertex, int attribute) const noexcept
             -> float override
         {
-            return isValidFloatVertexAttr(vertex, attribute)?
+            return isValidVertexFloatAttr(vertex, attribute)?
                 _vd[vertex].getFloatAttrs()[attribute]: 0;
         }
 
@@ -352,20 +357,25 @@ namespace gravis24
             int source, int target, int attribute) const noexcept
             -> int override
         {
-
+            auto arcAttrs = getArcAttrs<int>(source, target);
+            return static_cast<size_t>(attribute) < arcAttrs.size()?
+                arcAttrs[attribute]: 0;
         }
 
         [[nodiscard]] auto getArcFloatAttribute(
             int source, int target, int attribute) const noexcept
             -> float override
         {
-
+            auto arcAttrs = getArcAttrs<float>(source, target);
+            return static_cast<size_t>(attribute) < arcAttrs.size()?
+                arcAttrs[attribute]: 0;
         }
 
         /////////////////////////////////////////////////////
         // Реализация интерфейса EditableAdjacencyList
 
-        auto addVertex() -> int override
+        auto addVertex() 
+            -> int override
         {
             auto const index = static_cast<int>(_vd.size());
             _vd.resize(_vd.size() + 1);
@@ -374,7 +384,7 @@ namespace gravis24
 
         bool connect(int source, int target) override
         {
-            auto const max_required_size = std::max<size_t>(source, target) + 1;
+            auto const max_required_size = std::max(source, target) + 1;
             if (_vd.size() < max_required_size)
                 _vd.resize(max_required_size);
 
@@ -387,34 +397,42 @@ namespace gravis24
 
         bool disconnect(int source, int target) override
         {
-            if (_vd.size() <= static_cast<size_t>(source))
-                return false;
-
-            return std::ranges::contains(_vd[source].getTargets(), target);
+            return static_cast<size_t>(source) < _vd.size()
+                && std::ranges::contains(_vd[source].getTargets(), target);
         }
 
         void setVertexIntAttribute(
             int vertex, int attribute, int value) override
         {
-
+            if (isValidVertexIntAttr(vertex, attribute))
+                _vd[vertex].getIntAttrs()[attribute] = value;
+            // TODO: else log error
         }
 
         void setVertexFloatAttribute(
             int vertex, int attribute, float value) override
         {
-
+            if (isValidVertexFloatAttr(vertex, attribute))
+                _vd[vertex].getFloatAttrs()[attribute] = value;
+            // TODO: else log error
         }
 
         void setArcIntAttribute(
             int source, int target, int attribute, int value) override
         {
-
+            auto arcAttrs = getArcAttrs<int>(source, target);
+            if (static_cast<size_t>(attribute) < arcAttrs.size())
+                arcAttrs[attribute] = value;
+            // TODO: else log error
         }
 
         void setArcFloatAttribute(
             int source, int target, int attribute, float value) override
         {
-
+            auto arcAttrs = getArcAttrs<float>(source, target);
+            if (static_cast<size_t>(attribute) < arcAttrs.size())
+                arcAttrs[attribute] = value;
+            // TODO: else log error
         }
 
 
@@ -437,13 +455,14 @@ namespace gravis24
             return static_cast<size_t>(vertexIndex) < _vd.size();
         }
 
-        [[nodiscard]] bool isValidIntVertexAttr(int vertexIndex, int attrIndex) const noexcept
+        [[nodiscard]] bool isValidVertexIntAttr(
+            int vertexIndex, int attrIndex) const noexcept
         {
             return isValidVertex(vertexIndex) 
                 && static_cast<size_t>(attrIndex) < _vd[vertexIndex].getIntAttrs().size();
         }
 
-        [[nodiscard]] bool isValidFloatVertexAttr(int vertexIndex, int attrIndex) const noexcept
+        [[nodiscard]] bool isValidVertexFloatAttr(int vertexIndex, int attrIndex) const noexcept
         {
             return isValidVertex(vertexIndex) 
                 && static_cast<size_t>(attrIndex) < _vd[vertexIndex].getFloatAttrs().size();
@@ -466,18 +485,6 @@ namespace gravis24
             }
             
             return Result{};
-        }
-
-
-        [[nodiscard]] bool isValidArcIntAttr(int source, int target, int attrIndex) const noexcept
-        {
-            
-            return static_cast<size_t>(attrIndex) < getArcAttrs<int>(source, target).size();
-        }
-
-        [[nodiscard]] bool isValidArcFloatAttr(int source, int target, int attrIndex) const noexcept
-        {
-            return static_cast<size_t>(attrIndex) < getArcAttrs<float>(source, target).size();
         }
     };
 
