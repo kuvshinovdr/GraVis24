@@ -22,11 +22,11 @@ namespace gravis24
         [[nodiscard]] virtual bool areConnected(int source, int target) const noexcept 
             = 0;
 
-        [[nodiscard]] virtual auto getNeighborsCount(int vertex) const noexcept
+        [[nodiscard]] virtual auto getTargetCount(int vertex) const noexcept
             -> int = 0;
 
         /// @brief Если вершины нет (неверный индекс), возвращает пустой span.
-        [[nodiscard]] virtual auto getNeighbors(int vertex) const noexcept
+        [[nodiscard]] virtual auto getTargets(int vertex) const noexcept
             -> std::span<int const> = 0;
 
         [[nodiscard]] virtual auto getVertexIntAttributeCount() const noexcept
@@ -58,7 +58,7 @@ namespace gravis24
         /// @param attribute номер атрибута
         /// @return          значение атрибута; возвращает 0, если атрибут не существует
         [[nodiscard]] virtual auto getArcIntAttribute(
-            int source, int target, int attribute) const noexcept
+                int source, int target, int attribute) const noexcept
             -> int = 0;
 
         /// @brief           Получить значение атрибута типа float заданной дуги.
@@ -67,7 +67,7 @@ namespace gravis24
         /// @param attribute номер атрибута
         /// @return          значение атрибута; возвращает 0, если атрибут не существует
         [[nodiscard]] virtual auto getArcFloatAttribute(
-            int source, int target, int attribute) const noexcept 
+                int source, int target, int attribute) const noexcept 
             -> float = 0;
     };
 

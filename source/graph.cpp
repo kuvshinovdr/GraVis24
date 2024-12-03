@@ -52,7 +52,7 @@ namespace gravis24
         int const vertexCount = al.getVertexCount();
         int arcCount = 0;
         for (int v = 0; v < vertexCount; ++v)
-            arcCount += al.getNeighborsCount();
+            arcCount += al.getTargetCount(v);
 
         return
         {
@@ -73,10 +73,8 @@ namespace gravis24
         {
             auto const intAttrsCount   = el.getIntAttributeCount();
             auto const floatAttrsCount = el.getFloatAttributeCount();
-            auto const intAttrs = 
-                std::make_unique<int[]>(intAttrsCount);
-            auto const floatAttrs =
-                std::make_unique<float[]>(floatAttrsCount);
+            auto const intAttrs        = std::make_unique<int[]>(intAttrsCount);
+            auto const floatAttrs      = std::make_unique<float[]>(floatAttrsCount);
 
             auto const arcs     = el.getArcs();
             auto const arcCount = arcs.size();
@@ -104,22 +102,55 @@ namespace gravis24
         DenseAdjacencyMatrixView const& am, VisitArc visitArc)
     {
         static_assert(std::is_invocable_v<VisitArc, Arc>);
-        // TODO
+        int const vertexCount = am.getVertexCount();
+        for (int s = 0; s < vertexCount; ++s)
+        {
+            auto const sRow = am.getRow(s);
+            for (int t = 0; t < vertexCount; ++t)
+                if (sRow.getBit(t))
+                    visitArc(Arc{ .source = s, .target = t });
+        }
     }
 
     template <typename VisitArc>
     void visitAllArcs(
         AdjacencyListView const& al, VisitArc visitArc)
     {
+        int const vertexCount = al.getVertexCount();
         if constexpr (
             std::is_invocable_v<
-            VisitArc, Arc, std::span<int const>, std::span<float const>>)
+                VisitArc, Arc, std::span<int const>, std::span<float const>>)
         {
-            // TODO
+            // TODO: добавить интерфейс получения атрибутов дуги как span-ов.
+            auto const intAttrsCount   = al.getArcIntAttributeCount();
+            auto const floatAttrsCount = al.getArcFloatAttributeCount();
+            auto const intAttrs        = std::make_unique<int[]>(intAttrsCount);
+            auto const floatAttrs      = std::make_unique<float[]>(floatAttrsCount);
+            for (int s = 0; s < vertexCount; ++s)
+            {
+                auto const neighbors = al.getTargets(s);
+                for (int t: neighbors)
+                {
+                    for (int a = 0; a < intAttrsCount; ++a)
+                        intAttrs[a] = al.getArcIntAttribute(s, t, a);
+                    for (int a = 0; a < floatAttrsCount; ++a)
+                        floatAttrs[a] = al.getArcFloatAttribute(s, t, a);
+
+                    visitArc(Arc{ .source = s, .target = t },
+                        std::span(intAttrs.get(), intAttrsCount),
+                        std::span(floatAttrs.get(), floatAttrsCount));
+                }
+            }
         }
         else
         {
-            // TODO
+            static_assert(std::is_invocable_v<VisitArc, Arc>);
+            for (int s = 0; s < vertexCount; ++s)
+            {
+                auto const neighbors = al.getTargets(s);
+                for (int t: neighbors)
+                    visitArc(Arc{ .source = s, .target = t });
+            }
         }
     }
 

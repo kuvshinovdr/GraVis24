@@ -16,7 +16,7 @@ namespace gravis24
     {
     public:
         using Chunk = uint32_t;
-        static constexpr auto chunkBits = 8 * sizeof(Chunk);
+        static constexpr unsigned chunkBits = 8 * sizeof(Chunk);
 
         class RowView
         {
@@ -65,7 +65,7 @@ namespace gravis24
                     auto const lastChunk    = lastBitIndex / chunkBits;
                     auto const bitsInLastChunk = lastBitIndex % chunkBits;
                     int sum = std::popcount(_data[0] >> _offset);
-                    for (int i = 1; i < lastChunk; ++i)
+                    for (unsigned i = 1; i < lastChunk; ++i)
                         sum += std::popcount(_data[i]);
 
                     auto const lastChunkMask = (Chunk(1) << bitsInLastChunk) - 1;

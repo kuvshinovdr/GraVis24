@@ -128,7 +128,7 @@ namespace gravis24
             : public AttributesBase
         {
         public:
-            void resizeArcs(int count)
+            void resizeArcs(int count, int arcIntAttrCount, int arcFloatAttrCount)
             {
                 auto const oldSize = _targets.size();
                 auto const newSize = static_cast<size_t>(count);
@@ -136,17 +136,11 @@ namespace gravis24
                 _targets.resize(newSize);
                 _arcsAttrs.resize(newSize);
 
-                if (0 < oldSize && oldSize < newSize)
+                for (size_t i = oldSize; i < newSize; ++i)
                 {
-                    auto const intAttrsCount   = static_cast<int>(_arcsAttrs[0].getIntAttrs().size());
-                    auto const floatAttrsCount = static_cast<int>(_arcsAttrs[0].getFloatAttrs().size());
-
-                    for (size_t i = oldSize; i < newSize; ++i)
-                    {
-                        auto& arc = _arcsAttrs[i];
-                        arc.resizeIntAttrs(intAttrsCount);
-                        arc.resizeFloatAttrs(floatAttrsCount);
-                    }
+                    auto& arc = _arcsAttrs[i];
+                    arc.resizeIntAttrs(arcIntAttrCount);
+                    arc.resizeFloatAttrs(arcFloatAttrCount);
                 }
             }
 
@@ -249,6 +243,11 @@ namespace gravis24
         {
             using Base = std::vector<Vertex>;
 
+            int _vertexIntAttrCount   = 0;
+            int _vertexFloatAttrCount = 0;
+            int _arcIntAttrCount      = 0;
+            int _arcFloatAttrCount    = 0;
+
         public:
             using Base::empty;
             using Base::data;
@@ -265,6 +264,36 @@ namespace gravis24
                 return static_cast<int>(Base::size());
             }
 
+            [[nodiscard]] auto getVertexCount() const noexcept
+                -> int
+            {
+                return size();
+            }
+
+            [[nodiscard]] auto getVertexIntAttrCount() const noexcept
+                -> int
+            {
+                return _vertexIntAttrCount;
+            }
+
+            [[nodiscard]] auto getVertexFloatAttrCount() const noexcept
+                -> int
+            {
+                return _vertexFloatAttrCount;
+            }
+
+            [[nodiscard]] auto getArcIntAttrCount() const noexcept
+                -> int
+            {
+                return _arcIntAttrCount;
+            }
+
+            [[nodiscard]] auto getArcFloatAttrCount() const noexcept
+                -> int
+            {
+                return _arcFloatAttrCount;
+            }
+
             // Задать правильные размеры для новых вложенных массивов.
             void resize(int count)
             {
@@ -273,26 +302,13 @@ namespace gravis24
 
                 Base::resize(newSize);
 
-                if (0 < oldSize && oldSize < newSize)
+                for (size_t i = oldSize; i < newSize; ++i)
                 {
-                    auto const intAttrsCount   = static_cast<int>(front().getIntAttrs().size());
-                    auto const floatAttrsCount = static_cast<int>(front().getFloatAttrs().size());
-
-                    auto const arcAttrs = 
-                        front().getArcsAttrs();
-                    auto const arcIntAttrsCount = 
-                        arcAttrs.empty()? 0: static_cast<int>(arcAttrs.front().getIntAttrs().size());
-                    auto const arcFloatAttrsCount = 
-                        arcAttrs.empty()? 0: static_cast<int>(arcAttrs.front().getFloatAttrs().size());
-
-                    for (size_t i = oldSize; i < newSize; ++i)
-                    {
-                        auto& vertex = (*this)[i];
-                        vertex.resizeIntAttrs(intAttrsCount);
-                        vertex.resizeFloatAttrs(floatAttrsCount);
-                        vertex.resizeArcsIntAttrs(arcIntAttrsCount);
-                        vertex.resizeArcsFloatAttrs(arcFloatAttrsCount);
-                    }
+                    auto& vertex = (*this)[i];
+                    vertex.resizeIntAttrs(_vertexIntAttrCount);
+                    vertex.resizeFloatAttrs(_vertexFloatAttrCount);
+                    vertex.resizeArcsIntAttrs(_arcIntAttrCount);
+                    vertex.resizeArcsFloatAttrs(_arcFloatAttrCount);
                 }
             }
         };
@@ -319,40 +335,38 @@ namespace gravis24
                 && std::ranges::contains(_vd[source].getTargets(), target);
         }
 
-        [[nodiscard]] auto getNeighborsCount(int vertex) const noexcept
+        [[nodiscard]] auto getTargetCount(int vertex) const noexcept
             -> int override
         {
-            return static_cast<int>(getNeighbors(vertex).size());
+            return static_cast<int>(getTargets(vertex).size());
         }
 
         [[nodiscard]] auto getVertexIntAttributeCount() const noexcept
             -> int override
         {
-            return _vd.empty()? 0:
-                static_cast<int>(_vd.front().getIntAttrs().size());
+            return _vd.getVertexIntAttrCount();
         }
 
         [[nodiscard]] auto getVertexFloatAttributeCount() const noexcept
             -> int override
         {
-            return _vd.empty()? 0:
-                static_cast<int>(_vd.front().getFloatAttrs().size());
+            return _vd.getVertexFloatAttrCount();
         }
 
-        /*[[nodiscard]] auto getArcIntAttributeCount() const noexcept
+        [[nodiscard]] auto getArcIntAttributeCount() const noexcept
             -> int override
         {
-
+            return _vd.getArcIntAttrCount();
         }
 
         [[nodiscard]] auto getArcFloatAttributeCount() const noexcept
             -> int override
         {
-
-        }*/
+            return _vd.getArcFloatAttrCount();
+        }
 
         /// @brief Если вершины нет (неверный индекс), возвращает пустой span.
-        [[nodiscard]] auto getNeighbors(int vertex) const noexcept
+        [[nodiscard]] auto getTargets(int vertex) const noexcept
             -> std::span<int const> override
         {
             return isValidVertex(vertex)?
@@ -415,8 +429,8 @@ namespace gravis24
                 _vd.resize(max_required_size);
 
             auto&      vertex   = _vd[source];
-            auto const arcIndex = vertex.getTargets().size();
-            vertex.resizeArcs(arcIndex + 1);
+            auto const arcIndex = static_cast<int>(vertex.getTargets().size());
+            vertex.resizeArcs(arcIndex + 1, getArcIntAttributeCount(), getArcFloatAttributeCount());
             vertex.getTargets()[arcIndex] = target;
             return true;
         }
