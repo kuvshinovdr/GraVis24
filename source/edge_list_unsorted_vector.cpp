@@ -16,7 +16,7 @@ namespace gravis24
         /////////////////////////////////////////////////////
         // Реализация интерфейса EdgeListView
 
-        [[nodiscard]] auto getEdges() const noexcept
+        [[nodiscard]] auto getArcs() const noexcept
             -> std::span<Arc const> override
         {
             return _arcs;

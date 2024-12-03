@@ -22,12 +22,21 @@ namespace gravis24
         [[nodiscard]] virtual bool areConnected(int source, int target) const noexcept 
             = 0;
 
-        [[nodiscard]] virtual auto neighborsCount(int vertex) const noexcept
+        [[nodiscard]] virtual auto getNeighborsCount(int vertex) const noexcept
             -> int = 0;
 
         /// @brief Если вершины нет (неверный индекс), возвращает пустой span.
         [[nodiscard]] virtual auto getNeighbors(int vertex) const noexcept
             -> std::span<int const> = 0;
+
+        [[nodiscard]] virtual auto getVertexIntAttributeCount() const noexcept
+            -> int = 0;
+        [[nodiscard]] virtual auto getVertexFloatAttributeCount() const noexcept
+            -> int = 0;
+        [[nodiscard]] virtual auto getArcIntAttributeCount() const noexcept
+            -> int = 0;
+        [[nodiscard]] virtual auto getArcFloatAttributeCount() const noexcept
+            -> int = 0;
 
         /// @brief           Получить значение целочисленного атрибута вершины.
         /// @param vertex    номер вершины, которой принадлежит атрибут

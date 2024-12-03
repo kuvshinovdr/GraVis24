@@ -319,11 +319,37 @@ namespace gravis24
                 && std::ranges::contains(_vd[source].getTargets(), target);
         }
 
-        [[nodiscard]] auto neighborsCount(int vertex) const noexcept
+        [[nodiscard]] auto getNeighborsCount(int vertex) const noexcept
             -> int override
         {
             return static_cast<int>(getNeighbors(vertex).size());
         }
+
+        [[nodiscard]] auto getVertexIntAttributeCount() const noexcept
+            -> int override
+        {
+            return _vd.empty()? 0:
+                static_cast<int>(_vd.front().getIntAttrs().size());
+        }
+
+        [[nodiscard]] auto getVertexFloatAttributeCount() const noexcept
+            -> int override
+        {
+            return _vd.empty()? 0:
+                static_cast<int>(_vd.front().getFloatAttrs().size());
+        }
+
+        /*[[nodiscard]] auto getArcIntAttributeCount() const noexcept
+            -> int override
+        {
+
+        }
+
+        [[nodiscard]] auto getArcFloatAttributeCount() const noexcept
+            -> int override
+        {
+
+        }*/
 
         /// @brief Если вершины нет (неверный индекс), возвращает пустой span.
         [[nodiscard]] auto getNeighbors(int vertex) const noexcept

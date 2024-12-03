@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <bit>
 
 namespace gravis24
 {
@@ -26,6 +27,7 @@ namespace gravis24
                 : _data(data)
                 , _offset(firstBitOffset)
             {
+                // Предусловие: 0 <= _offset < chunkBits
                 // Пусто.
             }
 
@@ -45,6 +47,31 @@ namespace gravis24
             [[nodiscard]] bool isValid() const noexcept
             {
                 return _data != nullptr;
+            }
+
+            [[nodiscard]] auto computeSetBits(int vertices) const noexcept
+                -> int
+            {
+                if (vertices < chunkBits)
+                {
+                    auto chunk = _data[0];
+                    chunk &=  (Chunk(1) << vertices) - 1;
+                    chunk >>= _offset;
+                    return std::popcount(chunk);
+                }
+                else
+                {
+                    auto const lastBitIndex = unsigned(vertices + _offset);
+                    auto const lastChunk    = lastBitIndex / chunkBits;
+                    auto const bitsInLastChunk = lastBitIndex % chunkBits;
+                    int sum = std::popcount(_data[0] >> _offset);
+                    for (int i = 1; i < lastChunk; ++i)
+                        sum += std::popcount(_data[i]);
+
+                    auto const lastChunkMask = (Chunk(1) << bitsInLastChunk) - 1;
+                    sum += std::popcount(_data[lastChunk] & lastChunkMask);
+                    return sum;
+                }
             }
 
         private:

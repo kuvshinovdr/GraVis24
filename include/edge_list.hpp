@@ -26,14 +26,14 @@ namespace gravis24
         virtual ~EdgeListView() = default;
 
         /// @brief Получить все рёбра.
-        [[nodiscard]] virtual auto getEdges() const noexcept
+        [[nodiscard]] virtual auto getArcs() const noexcept
             -> std::span<Arc const> = 0;
 
         /// @brief Узнать сколько целочисленных атрибутов назначено на рёбра.
         [[nodiscard]] virtual auto getIntAttributeCount() const noexcept
             -> int = 0;
 
-        /// @brief Получить массив целочисленных атрибутов для всех рёбер (индекс ребра как в getEdges).
+        /// @brief Получить массив целочисленных атрибутов для всех рёбер (индекс ребра как в getArcs).
         /// @param attributeIndex < getIntAttributeCount() или возвращает пустой span
         [[nodiscard]] virtual auto getIntAttributes(int attributeIndex) const noexcept
             -> std::span<int const> = 0;
@@ -42,7 +42,7 @@ namespace gravis24
         [[nodiscard]] virtual auto getFloatAttributeCount() const noexcept
             -> int = 0;
 
-        /// @brief Получить массив атрибутов float для всех рёбер (индекс ребра как в getEdges).
+        /// @brief Получить массив атрибутов float для всех рёбер (индекс ребра как в getArcs).
         /// @param attributeIndex < getFloatAttributeCount() или возвращает пустой span
         [[nodiscard]] virtual auto getFloatAttributes(int attributeIndex) const noexcept
             -> std::span<float const> = 0;
