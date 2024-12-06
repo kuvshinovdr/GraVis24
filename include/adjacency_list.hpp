@@ -29,7 +29,7 @@ namespace gravis24
         [[nodiscard]] virtual auto getTargets(int vertex) const noexcept
             -> std::span<int const> = 0;
 
-        [[nodiscard]] virtual auto getVertexIntAttributeCount() const noexcept
+        [[nodiscard]] auto getVertexIntAttributeCount() const noexcept
             -> int = 0;
         [[nodiscard]] virtual auto getVertexFloatAttributeCount() const noexcept
             -> int = 0;
@@ -38,37 +38,26 @@ namespace gravis24
         [[nodiscard]] virtual auto getArcFloatAttributeCount() const noexcept
             -> int = 0;
 
-        /// @brief           Получить значение целочисленного атрибута вершины.
-        /// @param vertex    номер вершины, которой принадлежит атрибут
-        /// @param attribute номер атрибута
-        /// @return          значение атрибута; возвращает 0, если атрибут не существует
-        [[nodiscard]] virtual auto getVertexIntAttribute(int vertex, int attribute) const noexcept
-            -> int = 0;
+        /// @brief           Получить массив целочисленных атрибутов вершины.
+        /// @param vertex    номер вершины, которой принадлежат атрибуты
+        [[nodiscard]] virtual auto getVertexIntAttributes(int vertex) const noexcept
+            -> std::span<int const> = 0;
 
-        /// @brief           Получить значение атрибута типа float заданной вершины.
-        /// @param vertex    номер вершины, которой принадлежит атрибут
-        /// @param attribute номер атрибута
-        /// @return          значение атрибута; возвращает 0, если атрибут не существует
-        [[nodiscard]] virtual auto getVertexFloatAttribute(int vertex, int attribute) const noexcept 
-            -> float = 0;
+        /// @brief           Получить массив атрибутов типа float заданной вершины.
+        /// @param vertex    номер вершины, которой принадлежат атрибуты
+        [[nodiscard]] virtual auto getVertexFloatAttributes(int vertex) const noexcept 
+            -> std::span<float const> = 0;
 
-        /// @brief           Получить значение целочисленного атрибута дуги.
-        /// @param source    номер исходной вершины дуги
-        /// @param target    номер целевой вершины дуги
-        /// @param attribute номер атрибута
-        /// @return          значение атрибута; возвращает 0, если атрибут не существует
-        [[nodiscard]] virtual auto getArcIntAttribute(
-                int source, int target, int attribute) const noexcept
-            -> int = 0;
+        using ArcHandle = void*;
 
-        /// @brief           Получить значение атрибута типа float заданной дуги.
-        /// @param source    номер исходной вершины дуги
-        /// @param target    номер целевой вершины дуги
-        /// @param attribute номер атрибута
-        /// @return          значение атрибута; возвращает 0, если атрибут не существует
-        [[nodiscard]] virtual auto getArcFloatAttribute(
-                int source, int target, int attribute) const noexcept 
-            -> float = 0;
+        [[nodiscard]] virtual auto getArc(int source, int target) const noexcept
+            -> ArcHandle = 0;
+        
+        [[nodiscard]] virtual auto getArcIntAttributes(ArcHandle) const noexcept
+            -> std::span<int const>;
+
+        [[nodiscard]] virtual auto getArcFloatAttributes(ArcHandle) const noexcept
+            -> std::span<float const>;
     };
 
 
@@ -95,35 +84,17 @@ namespace gravis24
         /// @return       true, если дуга была удалена, false иначе
         virtual bool disconnect(int source, int target) = 0;
 
-        /// @brief           Установить значение целочисленного атрибута вершины.
-        /// @param vertex    номер вершины, которой принадлежит атрибут
-        /// @param attribute номер атрибута
-        /// @param value     значение атрибута
-        virtual void setVertexIntAttribute(
-            int vertex, int attribute, int value) = 0;
+        [[nodiscard]] virtual auto getVertexIntAttributes(int vertex) noexcept
+            -> std::span<int> = 0;
 
-        /// @brief           Установить значение атрибута типа float заданной вершины.
-        /// @param vertex    номер вершины, которой принадлежит атрибут
-        /// @param attribute номер атрибута
-        /// @param value     значение атрибута
-        virtual void setVertexFloatAttribute(
-            int vertex, int attribute, float value) = 0;
+        [[nodiscard]] virtual auto getVertexFloatAttributes(int vertex) noexcept 
+            -> std::span<float> = 0;
 
-        /// @brief           Установить значение целочисленного атрибута дуги.
-        /// @param source    номер исходной вершины дуги
-        /// @param target    номер целевой вершины дуги
-        /// @param attribute номер атрибута
-        /// @param value     значение атрибута
-        virtual void setArcIntAttribute(
-            int source, int target, int attribute, int value) = 0;
+        [[nodiscard]] virtual auto getArcIntAttributes(ArcHandle) noexcept
+            -> std::span<int>;
 
-        /// @brief           Установить значение атрибута типа float заданной дуги.
-        /// @param source    номер исходной вершины дуги
-        /// @param target    номер целевой вершины дуги
-        /// @param attribute номер атрибута
-        /// @param value     значение атрибута
-        virtual void setArcFloatAttribute(
-            int source, int target, int attribute, float value) = 0;
+        [[nodiscard]] virtual auto getArcFloatAttributes(ArcHandle) noexcept
+            -> std::span<float>;
     };
 
 

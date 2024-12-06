@@ -56,6 +56,17 @@ namespace gravis24
         : public EdgeListView
     {
     public:
+        /// @brief Задать предполагаемое число рёбер.
+        virtual void reserveArcCount(int arcCount) = 0;
+        /// @brief Задать число целочисленных атрибутов.
+        virtual void resizeIntAttributes(int attributeCount) = 0;
+        /// @brief Задать число атрибутов с плавающей точкой.
+        virtual void resizeFloatAttributes(int attributeCount) = 0;
+
+        /// @brief Получить все рёбра с возможностью изменения индексов вершин.
+        [[nodiscard]] virtual auto getArcs() noexcept
+            -> std::span<Arc> = 0;
+
         /// @brief        Добавить дугу.
         /// @param source исходная вершина
         /// @param target целевая вершина

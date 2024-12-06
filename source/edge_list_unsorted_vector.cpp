@@ -55,6 +55,40 @@ namespace gravis24
         /////////////////////////////////////////////////////
         // Реализация интерфейса EditableEdgeList
 
+        void reserveArcCount(int arcCount) override
+        {
+            auto const count = static_cast<size_t>(arcCount);
+            _arcs.reserve(count);
+            for (auto& attrs: _intAttrs)
+                attrs.reserve(count);
+            for (auto& attrs: _floatAttrs)
+                attrs.reserve(count);
+        }
+
+        void resizeIntAttributes(int attributeCount) override
+        {
+            auto const newSize = static_cast<size_t>(attributeCount);
+            auto const oldSize = _intAttrs.size();
+            _intAttrs.resize(newSize);
+            if (oldSize < newSize)
+                intAttributesResize(_arcs.size());
+        }
+        
+        void resizeFloatAttributes(int attributeCount) override
+        {
+            auto const newSize = static_cast<size_t>(attributeCount);
+            auto const oldSize = _intAttrs.size();
+            _floatAttrs.resize(newSize);
+            if (oldSize < newSize)
+                floatAttributesResize(_arcs.size());
+        }
+
+        [[nodiscard]] auto getArcs() noexcept
+            -> std::span<Arc>
+        {
+            return _arcs;
+        }
+
         // Не соблюдает инвариант уникальности дуг.
         int connect(int source, int target) override
         {
@@ -100,7 +134,9 @@ namespace gravis24
         EdgeListUnsortedVector() noexcept = default;
 
         explicit EdgeListUnsortedVector(
-            int arcsCount, int intAttrsCount = 0, int floatAttrsCount = 0)
+                int arcsCount, 
+                int intAttrsCount   = 0, 
+                int floatAttrsCount = 0)
             : _intAttrs(intAttrsCount)
             , _floatAttrs(floatAttrsCount)
         {
@@ -119,8 +155,18 @@ namespace gravis24
         void attributesResize()
         {
             auto const requiredSize = _arcs.size();
+            intAttributesResize(requiredSize);
+            floatAttributesResize(requiredSize);
+        }
+
+        void intAttributesResize(size_t requiredSize)
+        {
             for (auto& attrs: _intAttrs)
                 attributesResize(attrs, requiredSize);
+        }
+
+        void floatAttributesResize(size_t requiredSize)
+        {
             for (auto& attrs: _floatAttrs)
                 attributesResize(attrs, requiredSize);
         }

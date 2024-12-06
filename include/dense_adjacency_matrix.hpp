@@ -31,6 +31,9 @@ namespace gravis24
                 // Пусто.
             }
 
+            // Предполагается, что эта операция будет встроена в код без вызова (inline).
+            // Далее компилятор может выполнить ряд оптимизаций (если включена оптимизация),
+            // что позволит минимизировать число команд на выполнение доступа к подряд идущим битам.
             [[nodiscard]] bool getBit(int index) const noexcept
             {
                 auto const bitIndex  = unsigned(index + _offset);
@@ -49,15 +52,17 @@ namespace gravis24
                 return _data != nullptr;
             }
 
+            /// @brief          Посчитать, сколько единичных бит содержит строка (== степень выхода вершины).
+            /// @param vertices количество вершин в графе (== длина строки)
             [[nodiscard]] auto computeSetBits(int vertices) const noexcept
                 -> int
             {
                 if (vertices < chunkBits)
                 {
-                    auto chunk = _data[0];
-                    chunk &=  (Chunk(1) << vertices) - 1;
-                    chunk >>= _offset;
-                    return std::popcount(chunk);
+                    auto chunk =   _data[0];
+                    chunk      &=  (Chunk(1) << vertices) - 1;
+                    chunk      >>= _offset;
+                    return std::popcount(chunk); // одна команда на современных CPU
                 }
                 else
                 {
@@ -145,6 +150,7 @@ namespace gravis24
             void reset(int firstBit, int untilBit) noexcept
             {
                 // TODO: test this code
+                // TODO: аналогичные set, flip
                 auto const beginBit    = unsigned(firstBit + _offset);
                 auto const endBit      = unsigned(untilBit + _offset);
                 auto const beginChunk  = beginBit / chunkBits;
@@ -167,7 +173,7 @@ namespace gravis24
                     _data[beginChunk] &= ~m1;
 
                     for (unsigned chunk = beginChunk + 1;
-                        chunk < endChunk; ++chunk)
+                            chunk < endChunk; ++chunk)
                         _data[chunk] = Chunk{};
 
                     auto const m2    = (Chunk{1} << (endOffset + 1)) - 1;
