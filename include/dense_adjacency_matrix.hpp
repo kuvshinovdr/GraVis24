@@ -216,6 +216,10 @@ namespace gravis24
             int    _offset {};
         };
 
+
+        /// @brief Меняет размеры матрицы, обнуляет содержимое.
+        virtual void reshape(int vertexCount) = 0;
+
         using DenseAdjacencyMatrixView::getRow;
         [[nodiscard]] virtual auto getRow(int index) noexcept
             -> Row = 0;

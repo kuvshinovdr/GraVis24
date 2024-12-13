@@ -313,6 +313,88 @@ namespace gravis24
             }
         };
 
+
+        class ConstArcHandleImpl
+            : public AdjacencyListView::ConstArcHandle
+        {
+        public:
+            ConstArcHandleImpl(int target, ArcAttributes const& attrs) noexcept
+                : _target{ target }
+                , _attrs{ &attrs }
+            {
+                // Пусто.
+            }
+
+            auto target() const noexcept
+                -> int override
+            {
+                return _target;
+            }
+
+            auto getIntAttributes() const noexcept
+                -> std::span<int const> override
+            {
+                return _attrs->getIntAttrs();
+            }
+
+            auto getFloatAttributes() const noexcept
+                -> std::span<float const> override
+            {
+                return _attrs->getFloatAttrs();
+            }
+
+        private:
+            int                  _target {-1};
+            ArcAttributes const* _attrs  {};
+        };
+
+
+        class ArcHandleImpl
+            : public EditableAdjacencyList::ArcHandle
+        {
+        public:
+            ArcHandleImpl(int target, ArcAttributes& attrs) noexcept
+                : _target{ target }
+                , _attrs{ &attrs }
+            {
+                // Пусто.
+            }
+
+            auto target() const noexcept
+                -> int override
+            {
+                return _target;
+            }
+
+            auto getIntAttributes() const noexcept
+                -> std::span<int const> override
+            {
+                return _attrs->getIntAttrs();
+            }
+
+            auto getFloatAttributes() const noexcept
+                -> std::span<float const> override
+            {
+                return _attrs->getFloatAttrs();
+            }
+
+            auto getIntAttributes() noexcept
+                -> std::span<int> override
+            {
+                return _attrs->getIntAttrs();
+            }
+
+            auto getFloatAttributes() noexcept
+                -> std::span<float> override
+            {
+                return _attrs->getFloatAttrs();
+            }
+
+        private:
+            int            _target {-1};
+            ArcAttributes* _attrs  {};
+        };
+
     }
 
 
@@ -378,37 +460,37 @@ namespace gravis24
         // 2) бросить исключение;
         // 3) вернуть особое значение (std::optional, std::expected, nullptr и т.д.);
         // 4) доопределить.
-        // -- будем возвращать 0.
-        [[nodiscard]] auto getVertexIntAttribute(int vertex, int attribute) const noexcept
-            -> int override
+        // -- будем возвращать {}
+        [[nodiscard]] auto getVertexIntAttributes(int vertex) const noexcept
+            -> std::span<int const> override
         {
-            return isValidVertexIntAttr(vertex, attribute)?
-                _vd[vertex].getIntAttrs()[attribute]: 0;
+            if (isValidVertex(vertex))
+                return _vd[vertex].getIntAttrs();
+            return {};
         }
 
-        [[nodiscard]] auto getVertexFloatAttribute(int vertex, int attribute) const noexcept
-            -> float override
+        [[nodiscard]] auto getVertexFloatAttributes(int vertex) const noexcept
+            -> std::span<float const> override
         {
-            return isValidVertexFloatAttr(vertex, attribute)?
-                _vd[vertex].getFloatAttrs()[attribute]: 0;
+            if (isValidVertex(vertex))
+                return _vd[vertex].getFloatAttrs();
+            return {};
         }
-
-        [[nodiscard]] auto getArcIntAttribute(
-            int source, int target, int attribute) const noexcept
-            -> int override
+        
+        [[nodiscard]] auto getArc(int source, int target) const noexcept
+            -> std::unique_ptr<ConstArcHandle> override
         {
-            auto arcAttrs = getArcAttrs<int>(source, target);
-            return static_cast<size_t>(attribute) < arcAttrs.size()?
-                arcAttrs[attribute]: 0;
-        }
+            if (!isValidVertex(source))
+                return {};
 
-        [[nodiscard]] auto getArcFloatAttribute(
-            int source, int target, int attribute) const noexcept
-            -> float override
-        {
-            auto arcAttrs = getArcAttrs<float>(source, target);
-            return static_cast<size_t>(attribute) < arcAttrs.size()?
-                arcAttrs[attribute]: 0;
+            auto& sourceData = _vd[source];
+            auto  targets    = sourceData.getTargets();
+            auto const it    = std::ranges::find(targets, target);
+            if (it == targets.end())
+                return {};
+
+            auto const index = std::distance(targets.begin(), it);
+            return std::make_unique<ConstArcHandleImpl>(target, sourceData.getArcsAttrs()[index]);
         }
 
         /////////////////////////////////////////////////////
@@ -441,40 +523,37 @@ namespace gravis24
                 && std::ranges::contains(_vd[source].getTargets(), target);
         }
 
-        void setVertexIntAttribute(
-            int vertex, int attribute, int value) override
+        [[nodiscard]] auto getVertexIntAttributes(int vertex) noexcept
+            -> std::span<int>
         {
-            if (isValidVertexIntAttr(vertex, attribute))
-                _vd[vertex].getIntAttrs()[attribute] = value;
-            // TODO: else log error
+            if (isValidVertex(vertex))
+                return _vd[vertex].getIntAttrs();
+            return {};
         }
 
-        void setVertexFloatAttribute(
-            int vertex, int attribute, float value) override
+        [[nodiscard]] auto getVertexFloatAttributes(int vertex) noexcept
+            -> std::span<float>
         {
-            if (isValidVertexFloatAttr(vertex, attribute))
-                _vd[vertex].getFloatAttrs()[attribute] = value;
-            // TODO: else log error
+            if (isValidVertex(vertex))
+                return _vd[vertex].getFloatAttrs();
+            return {};
         }
 
-        void setArcIntAttribute(
-            int source, int target, int attribute, int value) override
+        [[nodiscard]] auto getArc(int source, int target) noexcept
+            -> std::unique_ptr<ArcHandle> override
         {
-            auto arcAttrs = getArcAttrs<int>(source, target);
-            if (static_cast<size_t>(attribute) < arcAttrs.size())
-                arcAttrs[attribute] = value;
-            // TODO: else log error
-        }
+            if (!isValidVertex(source))
+                return {};
 
-        void setArcFloatAttribute(
-            int source, int target, int attribute, float value) override
-        {
-            auto arcAttrs = getArcAttrs<float>(source, target);
-            if (static_cast<size_t>(attribute) < arcAttrs.size())
-                arcAttrs[attribute] = value;
-            // TODO: else log error
-        }
+            auto& sourceData = _vd[source];
+            auto  targets    = sourceData.getTargets();
+            auto const it    = std::ranges::find(targets, target);
+            if (it == targets.end())
+                return {};
 
+            auto const index = std::distance(targets.begin(), it);
+            return std::make_unique<ArcHandleImpl>(target, sourceData.getArcsAttrs()[index]);
+        }
 
         /////////////////////////////////////////////////////
         // Операции конструирования

@@ -2,20 +2,13 @@
 #ifndef GRAVIS24_EDGE_LIST_HPP
 #define GRAVIS24_EDGE_LIST_HPP
 
+#include "arc.hpp"
+
 #include <span>
 #include <memory> // unique_ptr
 
 namespace gravis24
 {
-
-    struct Arc
-    {
-        int source;
-        int target;
-
-        friend auto operator<=>(Arc const&, Arc const&) noexcept = default;
-    };
-
 
     //////////////////////////////////////////////////
     // Интерфейс EdgeListView

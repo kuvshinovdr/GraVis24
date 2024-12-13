@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <doctest/doctest.h>
+
 
 namespace gravis24
 {
@@ -172,8 +174,8 @@ namespace gravis24
         int const vertexCount = al.getVertexCount();
         for (int s = 0; s < vertexCount; ++s)
         {
-            auto const neighbors = al.getTargets(s);
-            for (int t: neighbors)
+            auto const targets = al.getTargets(s);
+            for (int t: targets)
                 visitArc(Arc{ .source = s, .target = t });
         }
     }
@@ -181,26 +183,62 @@ namespace gravis24
 
     template <typename GraphRepresentation>
     void convertGraphRepresentation(
-        GraphRepresentation const& from,
-        EditableEdgeList& el)
+            GraphRepresentation const&  from,
+            EditableEdgeList&           el,
+            int                         = 0 // unused
+        )
     {
         ArcDataSizes const sizeData = obtainArcDataSizes(from);
         el.reserveArcCount(sizeData.arcCount);
+        el.resizeIntAttributes(sizeData.intAttrCount);
+        el.resizeFloatAttributes(sizeData.floatAttrCount);
         
         visitAllArcs(from, 
-            [&](auto... args)
+            [&](Arc                    arc, 
+                std::span<int const>   intAttrs, 
+                std::span<float const> floatAttrs)
             {
-                if constexpr (sizeof...(args) == 1)
+                int const arcNo = el.connect(arc.source, arc.target);
+                int i = 0;
+                for (int a : intAttrs)
                 {
-                    Arc arc[] { args... };
-                    auto [s, t] = arc[0];
-                    el.connect(s, t);
+                    auto attrs = el.getIntAttributes(i++);
+                    REQUIRE(!attrs.empty());
+                    attrs[arcNo] = intAttrs[a];
                 }
-                else if (sizeof...(args) == 3)
-                {
 
+                i = 0;
+                for (float a : floatAttrs)
+                {
+                    auto attrs = el.getFloatAttributes(i++);
+                    REQUIRE(!attrs.empty());
+                    attrs[arcNo] = floatAttrs[a];
                 }
             });
+    }
+
+
+    template <typename GraphRepresentation>
+    void convertGraphRepresentation(
+            GraphRepresentation const&    from,
+            EditableDenseAdjacencyMatrix& am,
+            int                           vertexCount
+        )
+    {
+        am.reshape(vertexCount);
+        visitAllArcs(from, 
+                [&](Arc arc) { am.set(arc.source, arc.target); });
+    }
+
+
+    template <typename GraphRepresentation>
+    void convertGraphRepresentation(
+            GraphRepresentation const&  from,
+            EditableAdjacencyList&      al,
+            int                         vertexCount
+        )
+    {
+        
     }
 
 

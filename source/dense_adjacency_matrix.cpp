@@ -2,6 +2,7 @@
 /// @brief Реализация EditableDenseAdjacencyMatrix на основе std::vector.
 #include "../include/dense_adjacency_matrix.hpp"
 #include <vector>
+#include <algorithm>
 
 namespace gravis24
 {
@@ -16,10 +17,8 @@ namespace gravis24
         DenseAdjacencyMatrix() noexcept = default;
 
         explicit DenseAdjacencyMatrix(int vertexCount)
-            : _bits((size_t(vertexCount) * vertexCount + chunkBits - 1) / chunkBits)
-            , _vertexCount(vertexCount)
         {
-            // Пусто.
+            reshape(vertexCount);
         }
 
         /////////////////////////////////////////////////////
@@ -52,6 +51,16 @@ namespace gravis24
             auto const chunkIndex = bitIndex / chunkBits;
             auto const bitOffset  = static_cast<int>(bitIndex % chunkBits);
             return Row { _bits.data() + chunkIndex, bitOffset };
+        }
+
+        void reshape(int vertexCount) override
+        {
+            _bits.resize(
+                (size_t(vertexCount) * vertexCount + chunkBits - 1) / chunkBits
+                );
+
+            std::ranges::fill(_bits, Chunk{});
+            _vertexCount = vertexCount;
         }
 
     private:

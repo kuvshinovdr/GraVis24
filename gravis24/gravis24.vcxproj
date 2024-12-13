@@ -70,6 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(SolutionDir)..\doctest;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir)..\doctest;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -137,6 +143,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\adjacency_list.hpp" />
     <ClInclude Include="..\include\algorithm_dfs.hpp" />
+    <ClInclude Include="..\include\arc.hpp" />
     <ClInclude Include="..\include\dense_adjacency_matrix.hpp" />
     <ClInclude Include="..\include\edge_list.hpp" />
     <ClInclude Include="..\include\event.hpp" />

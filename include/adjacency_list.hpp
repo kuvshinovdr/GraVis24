@@ -4,6 +4,7 @@
 
 #include <span>
 #include <memory>
+#include <utility>
 
 namespace gravis24
 {
@@ -29,7 +30,7 @@ namespace gravis24
         [[nodiscard]] virtual auto getTargets(int vertex) const noexcept
             -> std::span<int const> = 0;
 
-        [[nodiscard]] auto getVertexIntAttributeCount() const noexcept
+        [[nodiscard]] virtual auto getVertexIntAttributeCount() const noexcept
             -> int = 0;
         [[nodiscard]] virtual auto getVertexFloatAttributeCount() const noexcept
             -> int = 0;
@@ -48,16 +49,20 @@ namespace gravis24
         [[nodiscard]] virtual auto getVertexFloatAttributes(int vertex) const noexcept 
             -> std::span<float const> = 0;
 
-        using ArcHandle = void*;
+        class ConstArcHandle
+        {
+        public:
+            virtual ~ConstArcHandle() = default;
+            virtual auto target() const noexcept
+                -> int = 0;
+            virtual auto getIntAttributes() const noexcept
+                -> std::span<int const> = 0;
+            virtual auto getFloatAttributes() const noexcept
+                -> std::span<float const> = 0;
+        };
 
         [[nodiscard]] virtual auto getArc(int source, int target) const noexcept
-            -> ArcHandle = 0;
-        
-        [[nodiscard]] virtual auto getArcIntAttributes(ArcHandle) const noexcept
-            -> std::span<int const>;
-
-        [[nodiscard]] virtual auto getArcFloatAttributes(ArcHandle) const noexcept
-            -> std::span<float const>;
+            -> std::unique_ptr<ConstArcHandle> = 0;
     };
 
 
@@ -90,11 +95,18 @@ namespace gravis24
         [[nodiscard]] virtual auto getVertexFloatAttributes(int vertex) noexcept 
             -> std::span<float> = 0;
 
-        [[nodiscard]] virtual auto getArcIntAttributes(ArcHandle) noexcept
-            -> std::span<int>;
+        class ArcHandle 
+            : public ConstArcHandle
+        {
+        public:
+            virtual auto getIntAttributes() noexcept
+                -> std::span<int> = 0;
+            virtual auto getFloatAttributes() noexcept
+                -> std::span<float> = 0;
+        };
 
-        [[nodiscard]] virtual auto getArcFloatAttributes(ArcHandle) noexcept
-            -> std::span<float>;
+        [[nodiscard]] virtual auto getArc(int source, int target) noexcept
+            -> std::unique_ptr<ArcHandle> = 0;
     };
 
 
