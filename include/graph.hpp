@@ -54,6 +54,10 @@ namespace gravis24
         virtual void removeAdjacencyList() noexcept = 0;
 
 
+        /// @brief  Добавить заданное число вершин (по умолчанию одну).
+        /// @return индекс последней добавленной вершины
+        virtual int addVertex(int addedCount = 1) = 0;
+
         /// @brief        Добавить дугу, если её нет.
         /// @param source исходная вершина
         /// @param target целевая вершина

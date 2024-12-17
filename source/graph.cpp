@@ -1,4 +1,4 @@
-/// @file graph.cpp
+ï»¿/// @file graph.cpp
 #include "../include/graph.hpp"
 
 #include <type_traits>
@@ -233,7 +233,7 @@ namespace gravis24
                 std::span<int const>   srcIntAttrs,
                 std::span<float const> srcFloatAttrs)
             {
-                // TODO: connectMakeHandle âîçâðàùàþùóþ ArcHandle
+                // TODO: connectMakeHandle Ð²Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÑŽÑ‰ÑƒÑŽ ArcHandle
                 al.connect(arc.source, arc.target);
                 auto ah = al.getArc(arc.source, arc.target);
                 auto destIntAttrs   = ah->getIntAttributes();
@@ -256,7 +256,7 @@ namespace gravis24
         explicit DefaultGraphImplementation(int vertexCount)
             : _vertexCount(vertexCount)
         {
-            // Ïóñòî.
+            // ÐŸÑƒÑÑ‚Ð¾.
         }
 
         [[nodiscard]] auto getVertexCount() const noexcept
@@ -350,27 +350,114 @@ namespace gravis24
             return *_al;
         }
 
-        /// @brief        Äîáàâèòü äóãó, åñëè å¸ íåò.
-        /// @param source èñõîäíàÿ âåðøèíà
-        /// @param target öåëåâàÿ âåðøèíà
-        /// @return       true, åñëè äóãà áûëà äîáàâëåíà, èíà÷å false (äóãà óæå áûëà)
-        bool connect(int source, int target) override
+
+        /// @brief  Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð·Ð°Ð´Ð°Ð½Ð½Ð¾Ðµ Ñ‡Ð¸ÑÐ»Ð¾ Ð²ÐµÑ€ÑˆÐ¸Ð½ (Ð¿Ð¾ ÑƒÐ¼Ð¾Ð»Ñ‡Ð°Ð½Ð¸ÑŽ Ð¾Ð´Ð½Ñƒ).
+        /// @return Ð¸Ð½Ð´ÐµÐºÑ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½ÐµÐ¹ Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð½Ð¾Ð¹ Ð²ÐµÑ€ÑˆÐ¸Ð½Ñ‹
+        int addVertex(int addedCount) override
         {
-            return false;
+            CHECK(addedCount >= 0);
+            _vertexCount += addedCount;
+            if (_al)
+                _al->resize(_vertexCount);
+            if (_am)
+                _am.reset();
+
+            return _vertexCount - 1;
         }
 
-        /// @brief        Óäàëèòü äóãó, åñëè îíà åñòü.
-        /// @param source èñõîäíàÿ âåðøèíà
-        /// @param target öåëåâàÿ âåðøèíà
-        /// @return       true, åñëè äóãà áûëà óäàëåíà, èíà÷å false (äóãè óæå íå áûëî)
+        /// @brief        Ð”Ð¾Ð±Ð°Ð²Ð¸Ñ‚ÑŒ Ð´ÑƒÐ³Ñƒ, ÐµÑÐ»Ð¸ ÐµÑ‘ Ð½ÐµÑ‚.
+        /// @param source Ð¸ÑÑ…Ð¾Ð´Ð½Ð°Ñ Ð²ÐµÑ€ÑˆÐ¸Ð½Ð°
+        /// @param target Ñ†ÐµÐ»ÐµÐ²Ð°Ñ Ð²ÐµÑ€ÑˆÐ¸Ð½Ð°
+        /// @return       true, ÐµÑÐ»Ð¸ Ð´ÑƒÐ³Ð° Ð±Ñ‹Ð»Ð° Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½Ð°, Ð¸Ð½Ð°Ñ‡Ðµ false (Ð´ÑƒÐ³Ð° ÑƒÐ¶Ðµ Ð±Ñ‹Ð»Ð°)
+        bool connect(int source, int target) override
+        {
+            if (auto max_vertex = std::max(source, target); max_vertex >= _vertexCount)
+                addVertex(max_vertex - _vertexCount + 1);
+
+            if (_am)
+            {
+                auto row = _am->getRow(source);
+                if (row.getBit(target))
+                    return false;
+                
+                row.setBit(target);
+                if (_el)
+                    _el->connect(source, target);
+                if (_al)
+                    _al->connect(source, target);
+
+                ++_arcCount;
+                return true;
+            }
+
+            if (_al)
+            {
+                if (!_al->connect(source, target))
+                    return false;
+                
+                if (_el)
+                    _el->connect(source, target);
+
+                ++_arcCount;
+                return true;
+            }
+
+            if (!_el)
+                _el = newEdgeListUnsortedVector();
+
+            _el->connect(source, target);
+            ++_arcCount;
+            return true;
+        }
+
+        /// @brief        Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð´ÑƒÐ³Ñƒ, ÐµÑÐ»Ð¸ Ð¾Ð½Ð° ÐµÑÑ‚ÑŒ.
+        /// @param source Ð¸ÑÑ…Ð¾Ð´Ð½Ð°Ñ Ð²ÐµÑ€ÑˆÐ¸Ð½Ð°
+        /// @param target Ñ†ÐµÐ»ÐµÐ²Ð°Ñ Ð²ÐµÑ€ÑˆÐ¸Ð½Ð°
+        /// @return       true, ÐµÑÐ»Ð¸ Ð´ÑƒÐ³Ð° Ð±Ñ‹Ð»Ð° ÑƒÐ´Ð°Ð»ÐµÐ½Ð°, Ð¸Ð½Ð°Ñ‡Ðµ false (Ð´ÑƒÐ³Ð¸ ÑƒÐ¶Ðµ Ð½Ðµ Ð±Ñ‹Ð»Ð¾)
         bool disconnect(int source, int target) override
         {
+            if (!_arcVerticesAreValid(source, target))
+                return false;
+
+            if (_am)
+            {
+                auto row = _am->getRow(source);
+                if (!row.getBit(target))
+                    return false;
+
+                row.resetBit(target);
+                if (_al)
+                    _al->disconnect(source, target);
+                if (_el)
+                    _el->disconnect(source, target);
+                
+                --_arcCount;
+                return true;
+            }
+
+            if (_al)
+            {
+                if (!_al->disconnect(source, target))
+                    return false;
+                if (_el)
+                    _el->disconnect(source, target);
+                
+                --_arcCount;
+                return true;
+            }
+
+            if (_el && _el->disconnect(source, target))
+            {
+                --_arcCount;
+                return true;
+            }
+
             return false;
         }
 
         [[nodiscard]] bool areConnected(int source, int target) const noexcept override
         {
-            if (_vertexCount <= source || _vertexCount <= target)
+            if (!_arcVerticesAreValid(source, target))
                 return false;
 
             if (_am)
@@ -397,7 +484,7 @@ namespace gravis24
             return { *this, _xyz };
         }
 
-        // Îòäåëüíàÿ îáðàáîòêà àòðèáóòîâ âåðøèí è ð¸áåð
+        // ÐžÑ‚Ð´ÐµÐ»ÑŒÐ½Ð°Ñ Ð¾Ð±Ñ€Ð°Ð±Ð¾Ñ‚ÐºÐ° Ð°Ñ‚Ñ€Ð¸Ð±ÑƒÑ‚Ð¾Ð² Ð²ÐµÑ€ÑˆÐ¸Ð½ Ð¸ Ñ€Ñ‘Ð±ÐµÑ€
 
 
     private:
@@ -409,6 +496,16 @@ namespace gravis24
         mutable std::unique_ptr<EditableEdgeList>             _el;
         mutable std::unique_ptr<EditableDenseAdjacencyMatrix> _am;
         mutable std::unique_ptr<EditableAdjacencyList>        _al;
+
+        [[nodiscard]] bool _vertexIsValid(int v) const noexcept
+        {
+            return 0 <= v && v < _vertexCount;
+        }
+
+        [[nodiscard]] bool _arcVerticesAreValid(int s, int t) const noexcept
+        {
+            return _vertexIsValid(s) && _vertexIsValid(t);
+        }
     };
 
 
