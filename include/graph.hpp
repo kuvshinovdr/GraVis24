@@ -27,7 +27,7 @@ namespace gravis24
 
         [[nodiscard]] virtual auto getVertexCount() const noexcept
             -> int = 0;
-        [[nodiscard]] virtual auto getEdgeCount() const noexcept
+        [[nodiscard]] virtual auto getArcCount() const noexcept
             -> int = 0;
 
         [[nodiscard]] virtual bool hasEdgeListView() const noexcept
@@ -145,6 +145,11 @@ namespace gravis24
         Graph&         _graph;
         std::span<XYZ> _vertexPositions;
     };
+
+
+    /// @brief Создать представление графа по умолчанию.
+    [[nodiscard]] auto newGraph(int vertexCount = 0)
+        -> std::unique_ptr<Graph>;
 
 }
 

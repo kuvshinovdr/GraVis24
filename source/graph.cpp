@@ -141,27 +141,15 @@ namespace gravis24
         AdjacencyListView const& al,
         ArcAttributesVisitorFunction auto visitArc)
     {
-        int const vertexCount      = al.getVertexCount();
-
-        // TODO: добавить интерфейс получения атрибутов дуги как span-ов.
-        auto const intAttrsCount   = al.getArcIntAttributeCount();
-        auto const floatAttrsCount = al.getArcFloatAttributeCount();
-        auto const intAttrs        = std::make_unique<int[]>(intAttrsCount);
-        auto const floatAttrs      = std::make_unique<float[]>(floatAttrsCount);
-        
+        int const vertexCount = al.getVertexCount();        
         for (int s = 0; s < vertexCount; ++s)
         {
-            auto const neighbors = al.getTargets(s);
-            for (int t: neighbors)
+            auto const targets = al.getTargets(s);
+            for (int t: targets)
             {
-                for (int a = 0; a < intAttrsCount; ++a)
-                    intAttrs[a] = al.getArcIntAttribute(s, t, a);
-                for (int a = 0; a < floatAttrsCount; ++a)
-                    floatAttrs[a] = al.getArcFloatAttribute(s, t, a);
-
+                auto arc = al.getArc(s, t);
                 visitArc(Arc{ .source = s, .target = t },
-                    std::span(intAttrs.get(), intAttrsCount),
-                    std::span(floatAttrs.get(), floatAttrsCount));
+                    arc->getIntAttributes(), arc->getFloatAttributes());
             }
         }
     }
@@ -199,20 +187,20 @@ namespace gravis24
                 std::span<float const> floatAttrs)
             {
                 int const arcNo = el.connect(arc.source, arc.target);
-                int i = 0;
-                for (int a : intAttrs)
+                int attr_index = 0;
+                for (int attr : intAttrs)
                 {
-                    auto attrs = el.getIntAttributes(i++);
+                    auto attrs = el.getIntAttributes(attr_index++);
                     REQUIRE(!attrs.empty());
-                    attrs[arcNo] = intAttrs[a];
+                    attrs[arcNo] = attr;
                 }
 
-                i = 0;
-                for (float a : floatAttrs)
+                attr_index = 0;
+                for (float attr : floatAttrs)
                 {
-                    auto attrs = el.getFloatAttributes(i++);
+                    auto attrs = el.getFloatAttributes(attr_index++);
                     REQUIRE(!attrs.empty());
-                    attrs[arcNo] = floatAttrs[a];
+                    attrs[arcNo] = attr;
                 }
             });
     }
@@ -246,16 +234,24 @@ namespace gravis24
         : public Graph
     {
     public:
+        DefaultGraphImplementation() noexcept = default;
+
+        explicit DefaultGraphImplementation(int vertexCount)
+            : _vertexCount(vertexCount)
+        {
+            // Пусто.
+        }
+
         [[nodiscard]] auto getVertexCount() const noexcept
             -> int override
         {
-
+            return _vertexCount;
         }
 
-        [[nodiscard]] auto getEdgeCount() const noexcept
+        [[nodiscard]] auto getArcCount() const noexcept
             -> int override
         {
-
+            return _arcCount;
         }
 
         [[nodiscard]] bool hasEdgeListView() const noexcept override
@@ -267,7 +263,14 @@ namespace gravis24
             -> EdgeListView const& override
         {
             if (!_el)
-                ;// makeEdgeList
+            {
+                _el = newEdgeListUnsortedVector();
+                if (_al)
+                    convertGraphRepresentation(*_al, *_el, getVertexCount());
+                else if (_am)
+                    convertGraphRepresentation(*_am, *_el, getVertexCount());
+            }
+
             return *_el;
         }
 
@@ -280,7 +283,15 @@ namespace gravis24
             -> DenseAdjacencyMatrixView const& override
         {
             if (!_am)
-                ;
+            {
+                auto const vertexCount = getVertexCount();
+                _am = newDenseAdjacencyMatrix(vertexCount);
+                if (_el)
+                    convertGraphRepresentation(*_el, *_am, vertexCount);
+                else if (_al)
+                    convertGraphRepresentation(*_al, *_am, vertexCount);
+            }
+
             return *_am;
         }
 
@@ -293,7 +304,15 @@ namespace gravis24
             -> AdjacencyListView const& override
         {
             if (!_al)
-                ;
+            {
+                auto const vertexCount = getVertexCount();
+                _al = newAdjacencyListVector(vertexCount);
+                if (_el)
+                    convertGraphRepresentation(*_el, *_al, vertexCount);
+                else if (_am)
+                    convertGraphRepresentation(*_am, *_al, vertexCount);
+            }
+
             return *_al;
         }
 
@@ -303,7 +322,7 @@ namespace gravis24
         /// @return       true, если дуга была добавлена, иначе false (дуга уже была)
         bool connect(int source, int target) override
         {
-
+            return false;
         }
 
         /// @brief        Удалить дугу, если она есть.
@@ -312,12 +331,22 @@ namespace gravis24
         /// @return       true, если дуга была удалена, иначе false (дуги уже не было)
         bool disconnect(int source, int target) override
         {
-
+            return false;
         }
 
         [[nodiscard]] bool areConnected(int source, int target) const noexcept override
         {
+            if (_vertexCount <= source || _vertexCount <= target)
+                return false;
 
+            if (_am)
+                return _am->getRow(source).getBit(target);
+            if (_al)
+                return _al->areConnected(source, target);
+            if (_el)
+                return _el->areConnected(source, target);
+
+            return false;
         }
 
         friend class ChangeableVertexPositions;
@@ -348,5 +377,11 @@ namespace gravis24
         mutable std::unique_ptr<EditableAdjacencyList>        _al;
     };
 
+
+    auto newGraph(int vertexCount)
+        -> std::unique_ptr<Graph>
+    {
+        return std::make_unique<DefaultGraphImplementation>(vertexCount);
+    }
 
 }
