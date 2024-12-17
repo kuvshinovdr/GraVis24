@@ -35,15 +35,24 @@ namespace gravis24
         [[nodiscard]] virtual auto getEdgeListView() const
             -> EdgeListView const& = 0;
 
+        virtual void removeEdgeList() noexcept = 0;
+
+        
         [[nodiscard]] virtual bool hasAdjacencyMatrixView() const noexcept
             = 0;
         [[nodiscard]] virtual auto getAdjacencyMatrixView() const
             -> DenseAdjacencyMatrixView const& = 0;
 
+        virtual void removeAdjacencyMatrix() noexcept = 0;
+
+
         [[nodiscard]] virtual bool hasAdjacencyListView() const noexcept
             = 0;
         [[nodiscard]] virtual auto getAdjacencyListView() const
             -> AdjacencyListView const& = 0;
+
+        virtual void removeAdjacencyList() noexcept = 0;
+
 
         /// @brief        Добавить дугу, если её нет.
         /// @param source исходная вершина

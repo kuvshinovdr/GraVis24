@@ -73,6 +73,13 @@ namespace gravis24
         : public AdjacencyListView
     {
     public:
+        /// @brief  Изменить количество вершин и атрибутов вершин, удалив все дуги и атрибуты.
+        virtual void resize(
+                int newVertexCount,
+                int newVertexIntAttributeCount   = 0,
+                int newVertexFloatAttributeCount = 0
+            ) = 0;
+
         /// @brief  Добавить новую вершину (получает наибольший индекс).
         /// @return индекс добавленной вершины
         virtual auto addVertex() -> int = 0;

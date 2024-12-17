@@ -295,21 +295,93 @@ namespace gravis24
             }
 
             // Задать правильные размеры для новых вложенных массивов.
-            void resize(int count)
+            // Передаётся -1, чтобы сохранить старое количество атрибутов.
+            void resize(
+                    int vertexCount,
+                    int vertexIntAttributeCount   = -1,
+                    int vertexFloatAttributeCount = -1,
+                    int arcIntAttributeCount      = -1,
+                    int arcFloatAttributeCount    = -1
+                )
             {
-                auto const oldSize = size();
-                auto const newSize = static_cast<size_t>(count);
+                auto const oldSize = static_cast<size_t>(size());
+                auto const newSize = static_cast<size_t>(vertexCount);
 
                 Base::resize(newSize);
 
+                _setupAttrs(
+                        &Vertex::resizeIntAttrs,
+                        vertexIntAttributeCount,
+                        _vertexIntAttrCount,
+                        oldSize,
+                        newSize
+                    );
+
+                _setupAttrs(
+                        &Vertex::resizeFloatAttrs,
+                        vertexFloatAttributeCount,
+                        _vertexFloatAttrCount,
+                        oldSize,
+                        newSize
+                    );
+
+                _setupAttrs(
+                        &Vertex::resizeArcsIntAttrs,
+                        arcIntAttributeCount,
+                        _arcIntAttrCount,
+                        oldSize,
+                        newSize
+                    );
+
+                _setupAttrs(
+                        &Vertex::resizeArcsFloatAttrs,
+                        arcFloatAttributeCount,
+                        _arcFloatAttrCount,
+                        oldSize,
+                        newSize
+                    );
+            }
+
+        private:
+            void _resizeAttrs(
+                    void (Vertex::*resizeMethod)(int), 
+                    int attrCount
+                )
+            {
+                for (auto& vertex: *this)
+                    (vertex.*resizeMethod)(attrCount);
+            }
+
+            void _resizeAttrs(
+                    void (Vertex::*resizeMethod)(int), 
+                    int attrCount, 
+                    size_t oldSize, 
+                    size_t newSize
+                )
+            {
                 for (size_t i = oldSize; i < newSize; ++i)
                 {
                     auto& vertex = (*this)[i];
-                    vertex.resizeIntAttrs(_vertexIntAttrCount);
-                    vertex.resizeFloatAttrs(_vertexFloatAttrCount);
-                    vertex.resizeArcsIntAttrs(_arcIntAttrCount);
-                    vertex.resizeArcsFloatAttrs(_arcFloatAttrCount);
+                    (vertex.*resizeMethod)(attrCount);
                 }
+            }
+
+            void _setupAttrs(
+                    void (Vertex::*resizeMethod)(int), 
+                    int     attrCount,
+                    int&    attrCountField,
+                    size_t  oldSize, 
+                    size_t  newSize
+                )
+            {
+                if (attrCount == -1)
+                {
+                    _resizeAttrs(resizeMethod, attrCountField, oldSize, newSize);
+                    return;
+                }
+
+                attrCountField = attrCount;
+                _resizeAttrs(resizeMethod, attrCount);
             }
         };
 
@@ -495,6 +567,19 @@ namespace gravis24
 
         /////////////////////////////////////////////////////
         // Реализация интерфейса EditableAdjacencyList
+
+        void resize(
+                int newVertexCount,
+                int newVertexIntAttributeCount   = 0,
+                int newVertexFloatAttributeCount = 0
+            ) override
+        {
+            _vd.resize(
+                    newVertexCount, 
+                    newVertexIntAttributeCount,
+                    newVertexFloatAttributeCount
+                );
+        }
 
         auto addVertex() 
             -> int override

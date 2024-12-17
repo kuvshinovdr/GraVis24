@@ -226,7 +226,24 @@ namespace gravis24
             int                         vertexCount
         )
     {
-        
+        auto sizes = obtainArcDataSizes(from);
+        al.resize(vertexCount, sizes.intAttrCount, sizes.floatAttrCount);
+        visitAllArcs(from, 
+            [&](Arc arc,
+                std::span<int const>   srcIntAttrs,
+                std::span<float const> srcFloatAttrs)
+            {
+                // TODO: connectMakeHandle возвращающую ArcHandle
+                al.connect(arc.source, arc.target);
+                auto ah = al.getArc(arc.source, arc.target);
+                auto destIntAttrs   = ah->getIntAttributes();
+                auto destFloatAttrs = ah->getFloatAttributes();
+
+                REQUIRE(destIntAttrs.size()   == srcIntAttrs.size());
+                REQUIRE(destFloatAttrs.size() == srcFloatAttrs.size());
+                std::ranges::copy(srcIntAttrs,   destIntAttrs.begin());
+                std::ranges::copy(srcFloatAttrs, destFloatAttrs.begin());
+            });
     }
 
 
@@ -259,6 +276,11 @@ namespace gravis24
             return _el != nullptr;
         }
 
+        void removeEdgeList() noexcept override
+        {
+            _el.reset();
+        }
+
         [[nodiscard]] auto getEdgeListView() const
             -> EdgeListView const& override
         {
@@ -274,9 +296,15 @@ namespace gravis24
             return *_el;
         }
 
+
         [[nodiscard]] bool hasAdjacencyMatrixView() const noexcept override
         {
             return _am != nullptr;
+        }
+
+        void removeAdjacencyMatrix() noexcept override
+        {
+            _am.reset();
         }
 
         [[nodiscard]] auto getAdjacencyMatrixView() const
@@ -295,9 +323,15 @@ namespace gravis24
             return *_am;
         }
 
+
         [[nodiscard]] bool hasAdjacencyListView() const noexcept override
         {
             return _al != nullptr;
+        }
+
+        void removeAdjacencyList() noexcept override
+        {
+            _al.reset();
         }
 
         [[nodiscard]] auto getAdjacencyListView() const
