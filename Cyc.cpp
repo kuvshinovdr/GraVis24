@@ -1,6 +1,3 @@
-// Cадрисламов Реваль ПМ-201
-
-
 #include <iostream>
 #include <vector>
 #include <stack>
@@ -105,17 +102,21 @@ vector<int> findCycle(const Graph &graph) {
 }
 
 int main() {
-    int vertices = 6; // Количество вершин в графе
+    int vertices, edges;
+    cout << "Enter the number of vertices: ";
+    cin >> vertices;
+
     Graph graph(vertices); // Создаем граф
 
-    // Пример графа
-    // Добавляем ребро между вершинами 0 и 1. Это пример добавления ребер в граф.
-    graph.addEdge(0, 1);
-    graph.addEdge(1, 2);
-    graph.addEdge(2, 3);
-    graph.addEdge(3, 1); // Это ребро образует цикл
-    graph.addEdge(3, 4);
-    graph.addEdge(4, 5);
+    cout << "Enter the number of edges: ";
+    cin >> edges;
+
+    cout << "Enter the edges :\n";
+    for (int i = 0; i < edges; i++) {
+        int src, dest;
+        cin >> src >> dest;
+        graph.addEdge(src, dest);
+    }
 
     // Ищем цикл в графе
     vector<int> cycle = findCycle(graph);
@@ -135,3 +136,15 @@ int main() {
 
     return 0;
 }
+
+
+// Пример ввода 
+// Введите количество вершин : 6
+// Введите количество ребер : 6
+// Введите границы :
+// 0 1
+// 1 2
+// 2 3
+// 3 1
+// 3 4
+// 4 5
