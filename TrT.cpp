@@ -1,53 +1,51 @@
 #include <iostream>
 #include <memory>
+using namespace std;
 
 struct TreeNode {
     int value;
-    std::unique_ptr<TreeNode> left;
-    std::unique_ptr<TreeNode> right;
+    unique_ptr<TreeNode> left;
+    unique_ptr<TreeNode> right;
 
     TreeNode(int val) : value(val), left(nullptr), right(nullptr) {}
 };
-// Обход в порядке предварительного (Preorder)
+
 void preorderTraversal(const TreeNode* node) {
     if (node != nullptr) {
-        std::cout << node->value << " ";  // Посетить корень
-        preorderTraversal(node->left.get());      // Обойти левое поддерево
-        preorderTraversal(node->right.get());     // Обойти правое поддерево
+        cout << node->value << " "; 
+        preorderTraversal(node->left.get());     
+        preorderTraversal(node->right.get());    
     }
 }
 
-// Обход в симметричном порядке (Inorder)
 void inorderTraversal(const TreeNode* node) {
     if (node != nullptr) {
-        inorderTraversal(node->left.get());       // Обойти левое поддерево
-        std::cout << node->value << " ";          // Посетить корень
-        inorderTraversal(node->right.get());      // Обойти правое поддерево
+        inorderTraversal(node->left.get());      
+        cout << node->value << " ";          
+        inorderTraversal(node->right.get());     
     }
 }
 
-// Обход в порядке постордерного (Postorder)
 void postorderTraversal(const TreeNode* node) {
     if (node != nullptr) {
-        postorderTraversal(node->left.get());     // Обойти левое поддерево
-        postorderTraversal(node->right.get());    // Обойти правое поддерево
-        std::cout << node->value << " ";          // Посетить корень
+        postorderTraversal(node->left.get());     
+        postorderTraversal(node->right.get());    
+        cout << node->value << " ";          
     }
 }
 int main() {
-    // Создание дерева
-    auto root = std::make_unique<TreeNode>(1);
-    root->left = std::make_unique<TreeNode>(2);
-    root->right = std::make_unique<TreeNode>(3);
-    root->left->left = std::make_unique<TreeNode>(4);
-    root->left->right = std::make_unique<TreeNode>(5);
+    auto root = make_unique<TreeNode>(1);
+    root->left = make_unique<TreeNode>(2);
+    root->right = make_unique<TreeNode>(3);
+    root->left->left = make_unique<TreeNode>(4);
+    root->left->right = make_unique<TreeNode>(5);
 
-    std::cout << "Preorder traversal:\n";
-    preorderTraversal(root.get());  // Вывод: 1 2 4 5 3
-    std::cout << "\nInorder traversal:\n";
-    inorderTraversal(root.get());    // Вывод: 4 2 5 1 3
-    std::cout << "\nPostorder traversal:\n";
-    postorderTraversal(root.get());  // Вывод: 4 5 2 3 1
+    cout << "Preorder traversal:\n";
+    preorderTraversal(root.get());  
+    cout << "\nInorder traversal:\n";
+    inorderTraversal(root.get());   
+    cout << "\nPostorder traversal:\n";
+    postorderTraversal(root.get());  
 
     return 0;
 }
